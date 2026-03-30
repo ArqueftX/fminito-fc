@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modifier un joueur · FMinito FC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:  #a8c000;
+      --green2: #c8e800;
+      --dark:   #0a0c06;
+      --card:   #181d0e;
+      --border: #2a3010;
+      --text:   #e8edcc;
+      --muted:  #7a8555;
+      --error:  #c0392b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--dark); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        repeating-linear-gradient(180deg, transparent 0px, transparent 58px, rgba(168,192,0,.04) 58px, rgba(168,192,0,.04) 60px),
+        repeating-linear-gradient(90deg, transparent 0px, transparent 118px, rgba(168,192,0,.03) 118px, rgba(168,192,0,.03) 120px);
+      pointer-events: none; z-index: 0;
+    }
+    nav {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+    }
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--muted); text-decoration: none;
+      font-family: 'Barlow Condensed', sans-serif; font-size: .95rem;
+      letter-spacing: .08em; text-transform: uppercase; transition: color .2s;
+    }
+    .back-btn:hover { color: var(--green); }
+    .nav-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .1em; color: var(--green); margin-left: auto; }
+    main { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+    .page-header { margin-bottom: 40px; }
+    .page-header h1 {
+      font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.2rem, 6vw, 3.5rem);
+      letter-spacing: .06em;
+      background: linear-gradient(135deg, #e8a000, #c87000);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1; margin-bottom: 8px;
+    }
+    .page-header p { color: var(--muted); font-family: 'Barlow Condensed', sans-serif; letter-spacing: .1em; font-size: .95rem; text-transform: uppercase; }
+    .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .form-section { padding: 28px 32px; border-bottom: 1px solid var(--border); }
+    .form-section:last-child { border-bottom: none; }
+    .form-section-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: .2em;
+      color: var(--green); text-transform: uppercase; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .form-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-row.single { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-family: 'Barlow Condensed', sans-serif; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    label .req { color: var(--green); margin-left: 2px; }
+    input, select {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 5px;
+      color: var(--text); font-family: 'Barlow', sans-serif; font-size: 1rem;
+      padding: 12px 14px; width: 100%; transition: border-color .2s, box-shadow .2s;
+      outline: none; -webkit-appearance: none;
+    }
+    input::placeholder { color: var(--muted); opacity: .6; }
+    input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(168,192,0,.12); }
+    input.error { border-color: var(--error); }
+    select option { background: #1a2008; color: var(--text); }
+    .select-wrap { position: relative; }
+    .select-wrap::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); font-size: .9rem; }
+    .select-wrap select { padding-right: 36px; }
+    .custom-nat-input { display: none; margin-top: 8px; animation: slideDown .25s ease; }
+    .custom-nat-input.visible { display: block; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .foot-toggle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .foot-option { position: relative; }
+    .foot-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .foot-option label {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; padding: 14px 8px; border: 1px solid var(--border); border-radius: 5px;
+      cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: .85rem;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--muted); transition: all .2s;
+      background: rgba(255,255,255,.02); text-align: center;
+    }
+    .foot-option label .icon { font-size: 1.4rem; margin-bottom: 2px; }
+    .foot-option input:checked + label { border-color: var(--green); background: rgba(168,192,0,.1); color: var(--green); box-shadow: 0 0 0 3px rgba(168,192,0,.08); }
+    .toggle-nat { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; }
+    .toggle-nat input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green); cursor: pointer; }
+    .toggle-nat span { font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    #nat2-container { display: none; animation: slideDown .25s ease; }
+    #nat2-container.visible { display: block; }
+
+    /* POSITION GRID */
+    .position-grid {
+      display: flex; flex-direction: column; gap: 8px;
+      background: rgba(0,0,0,.2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 16px;
+    }
+    .pos-row { display: flex; justify-content: center; align-items: center; gap: 8px; position: relative; }
+    .pos-line-label { position: absolute; left: 0; font-family: 'Barlow Condensed', sans-serif; font-size: .7rem; font-weight: 600; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; opacity: .5; }
+    .pos-option { position: relative; }
+    .pos-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .pos-option label { display: flex; align-items: center; justify-content: center; width: 52px; height: 36px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; font-weight: 600; letter-spacing: .05em; color: var(--muted); background: rgba(255,255,255,.02); transition: all .15s; }
+    .pos-option label:hover { border-color: rgba(168,192,0,.4); color: var(--text); }
+    .pos-option input:checked + label { background: var(--green); border-color: var(--green); color: var(--dark); box-shadow: 0 0 12px rgba(168,192,0,.3); }
+
+    .form-footer { padding: 24px 32px; background: rgba(168,192,0,.03); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .error-msg { font-family: 'Barlow Condensed', sans-serif; font-size: .9rem; color: var(--error); letter-spacing: .05em; display: none; }
+    .error-msg.visible { display: block; }
+    .btn-submit {
+      display: flex; align-items: center; gap: 10px;
+      background: #e8a000; color: var(--dark);
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.05rem;
+      letter-spacing: .1em; text-transform: uppercase; border: none; border-radius: 5px;
+      padding: 14px 28px; cursor: pointer; transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(232,160,0,.25); white-space: nowrap;
+    }
+    .btn-submit:hover { background: #ffc107; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(232,160,0,.4); }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: #e8a000; color: var(--dark); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: .1em; padding: 14px 28px; border-radius: 6px; z-index: 100; transition: transform .35s cubic-bezier(.175,.885,.32,1.275), opacity .35s; opacity: 0; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    @media (max-width: 540px) { nav { padding: 16px 20px; } .form-section { padding: 20px; } .form-row { grid-template-columns: 1fr; } .form-footer { flex-direction: column; align-items: stretch; } .btn-submit { justify-content: center; } }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="back-btn"><span>←</span> Retour</a>
+    <span class="nav-title">FMinito FC</span>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Modifier le Joueur</h1>
+      <p>Mets à jour la fiche de ton joueur</p>
+    </div>
+
+    <div class="form-card">
+
+      <!-- IDENTITÉ -->
+      <div class="form-section">
+        <div class="form-section-title">Identité</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Prénom <span class="req">*</span></label>
+            <input type="text" id="firstName" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label>Nom <span class="req">*</span></label>
+            <input type="text" id="lastName" autocomplete="off"/>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:10px">
+          <label>Nationalité principale <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="nationality1" onchange="toggleCustomNat('nationality1', 'customNat1')">
+              <option value="">— Choisir —</option>
+              <option>France</option><option>Espagne</option><option>Angleterre</option>
+              <option>Allemagne</option><option>Italie</option><option>Portugal</option>
+              <option>Belgique</option><option>Pays-Bas</option><option>Brésil</option>
+              <option>Argentine</option><option>Maroc</option><option>Algérie</option>
+              <option>Tunisie</option><option>Sénégal</option><option>Cameroun</option>
+              <option>USA</option><option>Japon</option><option>Croatie</option>
+              <option>Pologne</option><option>Serbie</option><option>Autre</option>
+            </select>
+          </div>
+          <div id="customNat1" class="custom-nat-input">
+            <input type="text" id="customNat1Input" placeholder="Précise le pays…" autocomplete="off"/>
+          </div>
+        </div>
+
+        <label class="toggle-nat">
+          <input type="checkbox" id="hasNat2" onchange="toggleNat2()"/>
+          <span>Double nationalité</span>
+        </label>
+        <div id="nat2-container">
+          <div class="field">
+            <label>Deuxième nationalité</label>
+            <div class="select-wrap">
+              <select id="nationality2" onchange="toggleCustomNat('nationality2', 'customNat2')">
+                <option value="">— Choisir —</option>
+                <option>France</option><option>Espagne</option><option>Angleterre</option>
+                <option>Allemagne</option><option>Italie</option><option>Portugal</option>
+                <option>Belgique</option><option>Pays-Bas</option><option>Brésil</option>
+                <option>Argentine</option><option>Maroc</option><option>Algérie</option>
+                <option>Tunisie</option><option>Sénégal</option><option>Cameroun</option>
+                <option>USA</option><option>Japon</option><option>Croatie</option>
+                <option>Pologne</option><option>Serbie</option><option>Autre</option>
+              </select>
+            </div>
+            <div id="customNat2" class="custom-nat-input">
+              <input type="text" id="customNat2Input" placeholder="Précise le pays…" autocomplete="off"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSTE -->
+      <div class="form-section">
+        <div class="form-section-title">Poste</div>
+        <div class="field">
+          <label>Poste principal <span class="req">*</span></label>
+          <div class="position-grid">
+            <div class="pos-row"><span class="pos-line-label">ATT</span>
+              <div class="pos-option"><input type="radio" name="position" id="posAC" value="AC"/><label for="posAC">AC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posBU" value="BU"/><label for="posBU">BU</label></div>
+            </div>
+            <div class="pos-row"><span class="pos-line-label">MIL</span>
+              <div class="pos-option"><input type="radio" name="position" id="posAG" value="AG"/><label for="posAG">AG</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posMOC" value="MOC"/><label for="posMOC">MOC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posAD" value="AD"/><label for="posAD">AD</label></div>
+            </div>
+            <div class="pos-row">
+              <div class="pos-option"><input type="radio" name="position" id="posMG" value="MG"/><label for="posMG">MG</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posMC" value="MC"/><label for="posMC">MC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posMD" value="MD"/><label for="posMD">MD</label></div>
+            </div>
+            <div class="pos-row"><span class="pos-line-label">DEF</span>
+              <div class="pos-option"><input type="radio" name="position" id="posMDC" value="MDC"/><label for="posMDC">MDC</label></div>
+            </div>
+            <div class="pos-row">
+              <div class="pos-option"><input type="radio" name="position" id="posDG" value="DG"/><label for="posDG">DG</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posDC" value="DC"/><label for="posDC">DC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posDD" value="DD"/><label for="posDD">DD</label></div>
+            </div>
+            <div class="pos-row"><span class="pos-line-label">GK</span>
+              <div class="pos-option"><input type="radio" name="position" id="posGK" value="GK"/><label for="posGK">GB</label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHYSIQUE -->
+      <div class="form-section">
+        <div class="form-section-title">Physique</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Taille (cm) <span class="req">*</span></label>
+            <input type="number" id="height" min="140" max="220"/>
+          </div>
+          <div class="field">
+            <label>Poids (kg) <span class="req">*</span></label>
+            <input type="number" id="weight" min="40" max="150"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Pied préféré <span class="req">*</span></label>
+          <div class="foot-toggle">
+            <div class="foot-option"><input type="radio" name="foot" id="footRight" value="Droit"/><label for="footRight"><span class="icon">🦵</span>Droit</label></div>
+            <div class="foot-option"><input type="radio" name="foot" id="footLeft" value="Gauche"/><label for="footLeft"><span class="icon">🦵</span>Gauche</label></div>
+            <div class="foot-option"><input type="radio" name="foot" id="footBoth" value="Ambidextre"/><label for="footBoth"><span class="icon">⚽</span>Ambidextre</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLUB -->
+      <div class="form-section">
+        <div class="form-section-title">Club</div>
+        <div class="form-row single">
+          <div class="field">
+            <label>Club actuel <span class="req">*</span></label>
+            <input type="text" id="club" autocomplete="off"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="form-footer">
+        <span class="error-msg" id="formError">⚠ Remplis tous les champs obligatoires.</span>
+        <button class="btn-submit" onclick="saveEdit()">✔ Enregistrer les modifications</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">✔ Joueur mis à jour !</div>
+
+  <script>
+    const STORAGE_KEY = 'fminito_players';
+    const KNOWN_NATS = ['France','Espagne','Angleterre','Allemagne','Italie','Portugal','Belgique','Pays-Bas','Brésil','Argentine','Maroc','Algérie','Tunisie','Sénégal','Cameroun','USA','Japon','Croatie','Pologne','Serbie'];
+
+    const params = new URLSearchParams(window.location.search);
+    const playerId = params.get('id');
+    let player = null;
+
+    function loadPlayer() {
+      const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      player = players.find(p => p.id === playerId);
+      if (!player) { alert('Joueur introuvable.'); window.location.href = 'index.html'; return; }
+
+      document.getElementById('firstName').value = player.firstName || '';
+      document.getElementById('lastName').value  = player.lastName  || '';
+      document.getElementById('height').value    = player.height    || '';
+      document.getElementById('weight').value    = player.weight    || '';
+      document.getElementById('club').value      = player.club      || '';
+
+      // Foot
+      const footEl = document.querySelector(`input[name="foot"][value="${player.foot}"]`);
+      if (footEl) footEl.checked = true;
+
+      // Position
+      if (player.position) {
+        const posEl = document.querySelector(`input[name="position"][value="${player.position}"]`);
+        if (posEl) posEl.checked = true;
+      }
+
+      // Nat 1
+      if (KNOWN_NATS.includes(player.nationality1)) {
+        document.getElementById('nationality1').value = player.nationality1;
+      } else if (player.nationality1) {
+        document.getElementById('nationality1').value = 'Autre';
+        document.getElementById('customNat1').classList.add('visible');
+        document.getElementById('customNat1Input').value = player.nationality1;
+      }
+
+      // Nat 2
+      if (player.nationality2) {
+        document.getElementById('hasNat2').checked = true;
+        document.getElementById('nat2-container').classList.add('visible');
+        if (KNOWN_NATS.includes(player.nationality2)) {
+          document.getElementById('nationality2').value = player.nationality2;
+        } else {
+          document.getElementById('nationality2').value = 'Autre';
+          document.getElementById('customNat2').classList.add('visible');
+          document.getElementById('customNat2Input').value = player.nationality2;
+        }
+      }
+    }
+
+    function toggleCustomNat(selectId, containerId) {
+      const val = document.getElementById(selectId).value;
+      document.getElementById(containerId).classList.toggle('visible', val === 'Autre');
+      if (val !== 'Autre') document.getElementById(containerId + 'Input').value = '';
+    }
+
+    function toggleNat2() {
+      const checked = document.getElementById('hasNat2').checked;
+      document.getElementById('nat2-container').classList.toggle('visible', checked);
+      if (!checked) {
+        document.getElementById('nationality2').value = '';
+        document.getElementById('customNat2').classList.remove('visible');
+        document.getElementById('customNat2Input').value = '';
+      }
+    }
+
+    function getVal(id) { return document.getElementById(id)?.value?.trim() || ''; }
+    function setError(id, hasError) { const el = document.getElementById(id); if (el) el.classList.toggle('error', hasError); }
+
+    function saveEdit() {
+      const firstName = getVal('firstName');
+      const lastName  = getVal('lastName');
+      let nationality1 = getVal('nationality1');
+      if (nationality1 === 'Autre') nationality1 = getVal('customNat1Input') || 'Autre';
+      let nationality2 = '';
+      if (document.getElementById('hasNat2').checked) {
+        nationality2 = getVal('nationality2');
+        if (nationality2 === 'Autre') nationality2 = getVal('customNat2Input') || 'Autre';
+      }
+      const height   = getVal('height');
+      const weight   = getVal('weight');
+      const club     = getVal('club');
+      const foot     = document.querySelector('input[name="foot"]:checked')?.value || '';
+      const position = document.querySelector('input[name="position"]:checked')?.value || '';
+
+      const errors = [
+        !firstName && 'firstName', !lastName && 'lastName',
+        !nationality1 && 'nationality1', !height && 'height',
+        !weight && 'weight', !club && 'club',
+      ].filter(Boolean);
+
+      ['firstName','lastName','nationality1','height','weight','club'].forEach(id => setError(id, false));
+      errors.forEach(id => setError(id, true));
+
+      if (errors.length > 0) { document.getElementById('formError').classList.add('visible'); return; }
+      document.getElementById('formError').classList.remove('visible');
+
+      const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const idx = players.findIndex(p => p.id === playerId);
+      if (idx === -1) { alert('Joueur introuvable.'); return; }
+
+      players[idx] = { ...players[idx], firstName, lastName, nationality1, nationality2, height: parseInt(height), weight: parseInt(weight), foot, club, position };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => { window.location.href = 'index.html'; }, 300); }, 1800);
+    }
+
+    loadPlayer();
+  </script>
+</body>
+</html>

@@ -272,6 +272,38 @@
       color: var(--muted);
       border-color: var(--border);
     }
+    .tag.pos {
+      background: rgba(168,192,0,.15);
+      color: var(--green2);
+      border-color: rgba(168,192,0,.3);
+      font-weight: 700;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .card-edit {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(168,192,0,.08);
+      border: 1px solid rgba(168,192,0,.2);
+      color: var(--green);
+      border-radius: 4px;
+      padding: 7px 10px;
+      font-size: .78rem;
+      cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: .05em;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .card-edit:hover { background: rgba(168,192,0,.18); border-color: var(--green); }
 
     .card-stats {
       display: grid;
@@ -302,14 +334,13 @@
 
     /* ── DELETE BTN ── */
     .card-delete {
-      position: absolute;
-      bottom: 16px; right: 16px;
+      flex: 1;
       background: transparent;
       border: 1px solid var(--border);
       color: var(--muted);
       border-radius: 4px;
-      padding: 4px 8px;
-      font-size: .75rem;
+      padding: 7px 10px;
+      font-size: .78rem;
       cursor: pointer;
       font-family: 'Barlow Condensed', sans-serif;
       letter-spacing: .05em;
@@ -415,6 +446,7 @@
             <div class="card-meta">
               <span class="tag">${flagEmoji(p.nationality1)}</span>
               ${p.nationality2 ? `<span class="tag">${flagEmoji(p.nationality2)}</span>` : ''}
+              ${p.position ? `<span class="tag pos">${p.position}</span>` : ''}
               <span class="tag club">⚽ ${p.club}</span>
             </div>
             <div class="card-stats">
@@ -431,7 +463,10 @@
                 <span class="stat-value">${footIcon(p.foot)}</span>
               </div>
             </div>
-            <button class="card-delete" onclick="deletePlayer('${p.id}')">✕ Supprimer</button>
+            <div class="card-actions">
+              <a href="edit.html?id=${p.id}" class="card-edit">✏ Modifier</a>
+              <button class="card-delete" onclick="deletePlayer('${p.id}')">✕ Supprimer</button>
+            </div>
           </div>
         `).join('')
       }</div>`;

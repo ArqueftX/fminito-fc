@@ -362,6 +362,60 @@
       .form-footer { flex-direction: column; align-items: stretch; }
       .btn-submit { justify-content: center; }
     }
+
+    /* ── POSITION GRID ── */
+    .position-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(0,0,0,.2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .pos-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+    .pos-line-label {
+      position: absolute;
+      left: 0;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      opacity: .5;
+    }
+    .pos-option { position: relative; }
+    .pos-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .pos-option label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      color: var(--muted);
+      background: rgba(255,255,255,.02);
+      transition: all .15s;
+    }
+    .pos-option label:hover { border-color: rgba(168,192,0,.4); color: var(--text); }
+    .pos-option input:checked + label {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--dark);
+      box-shadow: 0 0 12px rgba(168,192,0,.3);
+    }
   </style>
 </head>
 <body>
@@ -474,6 +528,41 @@
         </div>
       </div>
 
+      <!-- POSTE -->
+      <div class="form-section">
+        <div class="form-section-title">Poste</div>
+        <div class="field">
+          <label>Poste principal <span class="req">*</span></label>
+          <div class="position-grid">
+            <div class="pos-row"><span class="pos-line-label">ATT</span>
+              <div class="pos-option"><input type="radio" name="position" id="posAC" value="AC"/><label for="posAC">AC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posBU" value="BU"/><label for="posBU">BU</label></div>
+            </div>
+            <div class="pos-row"><span class="pos-line-label">MIL</span>
+              <div class="pos-option"><input type="radio" name="position" id="posAG" value="AG"/><label for="posAG">AG</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posMOC" value="MOC"/><label for="posMOC">MOC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posAD" value="AD"/><label for="posAD">AD</label></div>
+            </div>
+            <div class="pos-row">
+              <div class="pos-option"><input type="radio" name="position" id="posMG" value="MG"/><label for="posMG">MG</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posMC" value="MC"/><label for="posMC">MC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posMD" value="MD"/><label for="posMD">MD</label></div>
+            </div>
+            <div class="pos-row"><span class="pos-line-label">DEF</span>
+              <div class="pos-option"><input type="radio" name="position" id="posMDC" value="MDC"/><label for="posMDC">MDC</label></div>
+            </div>
+            <div class="pos-row">
+              <div class="pos-option"><input type="radio" name="position" id="posDG" value="DG"/><label for="posDG">DG</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posDC" value="DC"/><label for="posDC">DC</label></div>
+              <div class="pos-option"><input type="radio" name="position" id="posDD" value="DD"/><label for="posDD">DD</label></div>
+            </div>
+            <div class="pos-row"><span class="pos-line-label">GK</span>
+              <div class="pos-option"><input type="radio" name="position" id="posGK" value="GK"/><label for="posGK">GB</label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- CLUB -->
       <div class="form-section">
         <div class="form-section-title">Club</div>
@@ -544,6 +633,7 @@
       const weight      = getVal('weight');
       const club        = getVal('club');
       const foot        = document.querySelector('input[name="foot"]:checked')?.value || '';
+      const position    = document.querySelector('input[name="position"]:checked')?.value || '';
 
       const errors = [
         !firstName && 'firstName',
@@ -552,6 +642,7 @@
         !height    && 'height',
         !weight    && 'weight',
         !club      && 'club',
+        !position  && 'position',
       ].filter(Boolean);
 
       ['firstName','lastName','nationality1','height','weight','club'].forEach(id => setError(id, false));
@@ -569,7 +660,7 @@
         firstName, lastName, nationality1, nationality2,
         height: parseInt(height),
         weight: parseInt(weight),
-        foot, club,
+        foot, club, position,
         createdAt: new Date().toISOString()
       };
 
