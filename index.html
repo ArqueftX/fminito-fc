@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FMinito FC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:  #a8c000;
+      --green2: #c8e800;
+      --dark:   #0a0c06;
+      --mid:    #12160a;
+      --card:   #181d0e;
+      --border: #2a3010;
+      --text:   #e8edcc;
+      --muted:  #7a8555;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND PITCH LINES ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          180deg,
+          transparent 0px, transparent 58px,
+          rgba(168,192,0,.04) 58px, rgba(168,192,0,.04) 60px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px, transparent 118px,
+          rgba(168,192,0,.03) 118px, rgba(168,192,0,.03) 120px
+        );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 40px;
+      gap: 24px;
+    }
+
+    .logo-ring {
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      border: 3px solid var(--green);
+      box-shadow:
+        0 0 0 6px rgba(168,192,0,.12),
+        0 0 40px rgba(168,192,0,.3),
+        0 0 80px rgba(168,192,0,.1);
+      overflow: hidden;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    .logo-ring img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 6px rgba(168,192,0,.12), 0 0 40px rgba(168,192,0,.3), 0 0 80px rgba(168,192,0,.1); }
+      50%       { box-shadow: 0 0 0 6px rgba(168,192,0,.2),  0 0 60px rgba(168,192,0,.5), 0 0 120px rgba(168,192,0,.2); }
+    }
+
+    .club-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 10vw, 6rem);
+      letter-spacing: .06em;
+      line-height: 1;
+      text-align: center;
+      background: linear-gradient(135deg, var(--green2) 0%, var(--green) 60%, #5a6800 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(168,192,0,.4));
+    }
+
+    .subtitle {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 800px;
+      margin: 0 auto 48px;
+      padding: 0 20px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+    .divider span {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: .9rem;
+      letter-spacing: .3em;
+      color: var(--muted);
+    }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: .1em;
+      color: var(--green);
+    }
+
+    /* ── ADD BUTTON ── */
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--green);
+      color: var(--dark);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 4px;
+      padding: 12px 22px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(168,192,0,.25);
+    }
+    .btn-add:hover {
+      background: var(--green2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(168,192,0,.4);
+    }
+    .btn-add .plus {
+      font-size: 1.4rem;
+      line-height: 1;
+      font-weight: 300;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: rgba(168,192,0,.02);
+    }
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: .4;
+    }
+    .empty-state p {
+      color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: .05em;
+    }
+
+    /* ── PLAYER GRID ── */
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── PLAYER CARD ── */
+    .player-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      cursor: pointer;
+      animation: fadeUp .4s ease both;
+    }
+    .player-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--green);
+      box-shadow: 0 8px 30px rgba(168,192,0,.15);
+    }
+    .player-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--green2));
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      line-height: 1;
+      color: rgba(168,192,0,.08);
+      position: absolute;
+      top: 12px; right: 16px;
+      letter-spacing: -.02em;
+      user-select: none;
+    }
+
+    .card-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: .05em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 3px;
+      background: rgba(168,192,0,.08);
+      color: var(--green);
+      border: 1px solid rgba(168,192,0,.15);
+    }
+    .tag.club {
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      border-color: var(--border);
+    }
+
+    .card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .stat-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── DELETE BTN ── */
+    .card-delete {
+      position: absolute;
+      bottom: 16px; right: 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: .75rem;
+      cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: .05em;
+      transition: all .2s;
+    }
+    .card-delete:hover {
+      border-color: #c0392b;
+      color: #c0392b;
+      background: rgba(192,57,43,.08);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .85rem;
+      letter-spacing: .1em;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-ring">
+      <img src="logo.png" alt="FMinito FC Logo" />
+    </div>
+    <h1 class="club-title">FMinito FC</h1>
+    <p class="subtitle">Football Manager 26 · Saison en cours</p>
+  </header>
+
+  <div class="divider"><span>⬦ Effectif ⬦</span></div>
+
+  <main>
+    <div class="section-header">
+      <h2 class="section-title">Joueurs</h2>
+      <a href="create.html" class="btn-add">
+        <span class="plus">+</span>
+        Créer un joueur
+      </a>
+    </div>
+
+    <div id="roster"></div>
+  </main>
+
+  <footer>FMinito FC · FM26 · Créé avec passion</footer>
+
+  <script>
+    const STORAGE_KEY = 'fminito_players';
+
+    function getPlayers() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function savePlayers(players) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+    }
+
+    function deletePlayer(id) {
+      if (!confirm('Supprimer ce joueur ?')) return;
+      const players = getPlayers().filter(p => p.id !== id);
+      savePlayers(players);
+      render();
+    }
+
+    function footIcon(foot) {
+      if (foot === 'Droit') return '🦵 Droit';
+      if (foot === 'Gauche') return '🦵 Gauche';
+      return '🦵 Ambidextre';
+    }
+
+    function flagEmoji(country) {
+      const flags = {
+        'France':'🇫🇷','Espagne':'🇪🇸','Angleterre':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Allemagne':'🇩🇪','Italie':'🇮🇹',
+        'Portugal':'🇵🇹','Belgique':'🇧🇪','Brésil':'🇧🇷','Argentine':'🇦🇷','Pays-Bas':'🇳🇱',
+        'Maroc':'🇲🇦','Algérie':'🇩🇿','Tunisie':'🇹🇳','Sénégal':'🇸🇳','Cameroun':'🇨🇲',
+        'USA':'🇺🇸','Japon':'🇯🇵','Croatie':'🇭🇷','Pologne':'🇵🇱','Serbie':'🇷🇸'
+      };
+      return (flags[country] || '🌍') + ' ' + country;
+    }
+
+    function render() {
+      const players = getPlayers();
+      const container = document.getElementById('roster');
+
+      if (players.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">⚽</div>
+            <p>Aucun joueur pour l'instant.<br>Clique sur <strong>+ Créer un joueur</strong> pour commencer.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = `<div class="player-grid">${
+        players.map((p, i) => `
+          <div class="player-card">
+            <div class="card-number">${String(i + 1).padStart(2, '0')}</div>
+            <div class="card-name">${p.lastName.toUpperCase()} ${p.firstName}</div>
+            <div class="card-meta">
+              <span class="tag">${flagEmoji(p.nationality1)}</span>
+              ${p.nationality2 ? `<span class="tag">${flagEmoji(p.nationality2)}</span>` : ''}
+              <span class="tag club">⚽ ${p.club}</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-item">
+                <span class="stat-label">Taille</span>
+                <span class="stat-value">${p.height} cm</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Poids</span>
+                <span class="stat-value">${p.weight} kg</span>
+              </div>
+              <div class="stat-item" style="grid-column:1/-1">
+                <span class="stat-label">Pied préféré</span>
+                <span class="stat-value">${footIcon(p.foot)}</span>
+              </div>
+            </div>
+            <button class="card-delete" onclick="deletePlayer('${p.id}')">✕ Supprimer</button>
+          </div>
+        `).join('')
+      }</div>`;
+    }
+
+    render();
+  </script>
+</body>
+</html>
