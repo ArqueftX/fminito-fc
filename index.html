@@ -440,7 +440,7 @@
 
       container.innerHTML = `<div class="player-grid">${
         players.map((p, i) => `
-          <div class="player-card">
+          <div class="player-card" onclick="window.location.href='player.html?id=${p.id}'">
             <div class="card-number">${String(i + 1).padStart(2, '0')}</div>
             <div class="card-name">${p.lastName.toUpperCase()} ${p.firstName}</div>
             <div class="card-meta">
@@ -463,7 +463,7 @@
                 <span class="stat-value">${footIcon(p.foot)}</span>
               </div>
             </div>
-            <div class="card-actions">
+            <div class="card-actions" onclick="event.stopPropagation()">
               <a href="edit.html?id=${p.id}" class="card-edit">✏ Modifier</a>
               <button class="card-delete" onclick="deletePlayer('${p.id}')">✕ Supprimer</button>
             </div>
