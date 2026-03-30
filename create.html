@@ -274,6 +274,13 @@
     }
     #nat2-container.visible { display: block; }
 
+    .custom-nat-input {
+      display: none;
+      margin-top: 8px;
+      animation: slideDown .25s ease;
+    }
+    .custom-nat-input.visible { display: block; }
+
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-8px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -392,7 +399,7 @@
         <div class="field" style="margin-bottom:10px">
           <label>Nationalité principale <span class="req">*</span></label>
           <div class="select-wrap">
-            <select id="nationality1">
+            <select id="nationality1" onchange="toggleCustomNat('nationality1', 'customNat1')">
               <option value="">— Choisir —</option>
               <option>France</option><option>Espagne</option><option>Angleterre</option>
               <option>Allemagne</option><option>Italie</option><option>Portugal</option>
@@ -402,6 +409,9 @@
               <option>USA</option><option>Japon</option><option>Croatie</option>
               <option>Pologne</option><option>Serbie</option><option>Autre</option>
             </select>
+          </div>
+          <div id="customNat1" class="custom-nat-input">
+            <input type="text" id="customNat1Input" placeholder="Précise le pays…" autocomplete="off"/>
           </div>
         </div>
 
@@ -413,7 +423,7 @@
           <div class="field">
             <label>Deuxième nationalité</label>
             <div class="select-wrap">
-              <select id="nationality2">
+              <select id="nationality2" onchange="toggleCustomNat('nationality2', 'customNat2')">
                 <option value="">— Choisir —</option>
                 <option>France</option><option>Espagne</option><option>Angleterre</option>
                 <option>Allemagne</option><option>Italie</option><option>Portugal</option>
@@ -423,6 +433,9 @@
                 <option>USA</option><option>Japon</option><option>Croatie</option>
                 <option>Pologne</option><option>Serbie</option><option>Autre</option>
               </select>
+            </div>
+            <div id="customNat2" class="custom-nat-input">
+              <input type="text" id="customNat2Input" placeholder="Précise le pays…" autocomplete="off"/>
             </div>
           </div>
         </div>
@@ -488,11 +501,24 @@
   <script>
     const STORAGE_KEY = 'fminito_players';
 
+    function toggleCustomNat(selectId, containerId) {
+      const val = document.getElementById(selectId).value;
+      const container = document.getElementById(containerId);
+      container.classList.toggle('visible', val === 'Autre');
+      if (val !== 'Autre') {
+        document.getElementById(containerId + 'Input').value = '';
+      }
+    }
+
     function toggleNat2() {
       const checked = document.getElementById('hasNat2').checked;
       const container = document.getElementById('nat2-container');
       container.classList.toggle('visible', checked);
-      if (!checked) document.getElementById('nationality2').value = '';
+      if (!checked) {
+        document.getElementById('nationality2').value = '';
+        document.getElementById('customNat2').classList.remove('visible');
+        document.getElementById('customNat2Input').value = '';
+      }
     }
 
     function getVal(id) {
@@ -507,12 +533,17 @@
     function submitForm() {
       const firstName   = getVal('firstName');
       const lastName    = getVal('lastName');
-      const nationality1= getVal('nationality1');
+      let nationality1 = getVal('nationality1');
+      if (nationality1 === 'Autre') nationality1 = getVal('customNat1Input') || 'Autre';
+      let nationality2 = '';
+      if (document.getElementById('hasNat2').checked) {
+        nationality2 = getVal('nationality2');
+        if (nationality2 === 'Autre') nationality2 = getVal('customNat2Input') || 'Autre';
+      }
       const height      = getVal('height');
       const weight      = getVal('weight');
       const club        = getVal('club');
       const foot        = document.querySelector('input[name="foot"]:checked')?.value || '';
-      const nationality2= document.getElementById('hasNat2').checked ? getVal('nationality2') : '';
 
       const errors = [
         !firstName && 'firstName',
