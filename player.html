@@ -207,15 +207,29 @@
       color: var(--muted); opacity: .5;
     }
 
-    /* WHEEL TOP BAR */
-    .wheel-top-bar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-    .btn-admin-wheel {
-      background: rgba(168,192,0,.08); border: 1px solid rgba(168,192,0,.2);
-      color: var(--muted); border-radius: 5px; padding: 8px 14px;
-      font-family: 'Barlow Condensed', sans-serif; font-size: .82rem; letter-spacing: .08em;
-      text-transform: uppercase; cursor: pointer; transition: all .2s; flex-shrink: 0;
+    /* WHEEL CTA */
+    .wheel-cta-block {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 24px 28px; text-decoration: none; cursor: pointer;
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+      position: relative; overflow: hidden;
     }
-    .btn-admin-wheel:hover { color: var(--green); border-color: var(--green); }
+    .wheel-cta-block::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--green2));
+    }
+    .wheel-cta-block:hover {
+      border-color: var(--green);
+      box-shadow: 0 8px 30px rgba(168,192,0,.15);
+      transform: translateY(-2px);
+    }
+    .wheel-cta-left { display: flex; align-items: center; gap: 18px; }
+    .wheel-cta-icon { font-size: 2.2rem; }
+    .wheel-cta-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .06em; color: var(--text); line-height: 1; }
+    .wheel-cta-sub { font-family: 'Barlow Condensed', sans-serif; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+    .wheel-cta-arrow { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--green); opacity: .5; transition: opacity .2s, transform .2s; }
+    .wheel-cta-block:hover .wheel-cta-arrow { opacity: 1; transform: translateX(4px); }
 
     /* ADMIN MODAL */
     #admin-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
@@ -417,31 +431,16 @@
         </div>
 
         <!-- ROUE DU DESTIN -->
-        <div class="wheel-section" id="wheel-section">
-          <div class="wheel-top-bar">
+        <a href="wheel.html?id=${p.id}" class="wheel-cta-block">
+          <div class="wheel-cta-left">
+            <div class="wheel-cta-icon">🎰</div>
             <div>
-              <div class="wheel-title">Roue du Destin</div>
-              <div class="wheel-sub">Fonctionnalité verrouillée · Admin uniquement</div>
+              <div class="wheel-cta-title">Roue du Destin</div>
+              <div class="wheel-cta-sub">Clique pour accéder à ta roue</div>
             </div>
-            <button class="btn-admin-wheel" onclick="adminOpenWheel()">🎰 Roue du Destin</button>
           </div>
-          <div class="wheel-preview">
-            <svg viewBox="0 0 260 260" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="130" cy="130" r="100" fill="none" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
-              <circle cx="130" cy="130" r="75"  fill="none" stroke="rgba(168,192,0,.08)" stroke-width="1"/>
-              <circle cx="130" cy="130" r="50"  fill="none" stroke="rgba(168,192,0,.06)" stroke-width="1"/>
-              <circle cx="130" cy="130" r="25"  fill="none" stroke="rgba(168,192,0,.04)" stroke-width="1"/>
-              <line x1="130" y1="30"  x2="130" y2="230" stroke="rgba(168,192,0,.08)" stroke-width="1"/>
-              <line x1="30"  y1="130" x2="230" y2="130" stroke="rgba(168,192,0,.08)" stroke-width="1"/>
-              <line x1="59"  y1="59"  x2="201" y2="201" stroke="rgba(168,192,0,.06)" stroke-width="1"/>
-              <line x1="201" y1="59"  x2="59"  y2="201" stroke="rgba(168,192,0,.06)" stroke-width="1"/>
-              <circle cx="130" cy="130" r="8" fill="rgba(168,192,0,.2)" stroke="rgba(168,192,0,.4)" stroke-width="1.5"/>
-            </svg>
-            <div class="lock-overlay"><div class="lock-icon">🔒</div></div>
-          </div>
-          <button class="btn-wheel" disabled><span class="lock">🔒</span> Verrouillée</button>
-          <div><span class="coming-soon">Disponible prochainement</span></div>
-        </div>
+          <div class="wheel-cta-arrow">→</div>
+        </a>
 
         <!-- BLOCS DU BAS -->
         <div class="bottom-grid">
