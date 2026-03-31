@@ -24,147 +24,88 @@
         repeating-linear-gradient(90deg, transparent 0px, transparent 118px, rgba(168,192,0,.03) 118px, rgba(168,192,0,.03) 120px);
       pointer-events: none; z-index: 0;
     }
-
-    nav {
-      position: relative; z-index: 1;
-      display: flex; align-items: center; gap: 16px;
-      padding: 20px 40px; border-bottom: 1px solid var(--border);
-    }
-    .back-btn {
-      display: flex; align-items: center; gap: 8px; color: var(--muted);
-      text-decoration: none; font-family: 'Barlow Condensed', sans-serif;
-      font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; transition: color .2s;
-    }
+    nav { position: relative; z-index: 1; display: flex; align-items: center; gap: 16px; padding: 20px 40px; border-bottom: 1px solid var(--border); }
+    .back-btn { display: flex; align-items: center; gap: 8px; color: var(--muted); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; transition: color .2s; }
     .back-btn:hover { color: var(--green); }
     .nav-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .1em; color: var(--green); margin-left: auto; }
+    main { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
 
-    main {
-      position: relative; z-index: 1;
-      max-width: 900px; margin: 0 auto;
-      padding: 40px 24px 80px;
-      display: flex; flex-direction: column; align-items: center; gap: 32px;
-    }
-
-    /* PLAYER BANNER */
-    .player-banner {
-      width: 100%;
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 18px 24px;
-      display: flex; align-items: center; gap: 16px;
-    }
-    .banner-pos {
-      font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--green);
-      background: rgba(168,192,0,.08); border: 1px solid rgba(168,192,0,.2);
-      border-radius: 6px; padding: 4px 14px; line-height: 1.2;
-    }
-    .banner-name {
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .05em;
-    }
+    .player-banner { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+    .banner-pos { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--green); background: rgba(168,192,0,.08); border: 1px solid rgba(168,192,0,.2); border-radius: 6px; padding: 4px 14px; line-height: 1.3; }
+    .banner-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: .05em; }
     .banner-name span { color: var(--green); }
-    .banner-club { font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+    .banner-club { font-family: 'Barlow Condensed', sans-serif; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 
-    /* WHEEL WRAPPER */
-    .wheel-wrapper {
-      position: relative; width: 380px; height: 380px;
-      filter: drop-shadow(0 0 30px rgba(168,192,0,.2));
-    }
+    /* PHASE SELECT */
+    #phase-select { width: 100%; display: flex; flex-direction: column; gap: 20px; }
+    .s-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .s-title { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: .15em; color: var(--green); padding: 14px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .s-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .s-body { padding: 20px; }
 
-    /* POINTER */
-    .pointer {
-      position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
-      width: 0; height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-top: 28px solid var(--green2);
-      filter: drop-shadow(0 0 6px rgba(200,232,0,.6));
-      z-index: 10;
-    }
+    .spin-options { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .spin-opt { position: relative; }
+    .spin-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .spin-opt label { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 72px; height: 72px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--muted); background: rgba(255,255,255,.02); transition: all .15s; gap: 2px; }
+    .spin-opt label small { font-family: 'Barlow Condensed', sans-serif; font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; }
+    .spin-opt input:checked + label { border-color: var(--green); background: rgba(168,192,0,.12); color: var(--green2); box-shadow: 0 0 14px rgba(168,192,0,.2); }
+    .spin-opt label:hover { border-color: rgba(168,192,0,.4); color: var(--text); }
 
-    canvas#wheelCanvas { border-radius: 50%; display: block; }
+    .repartition { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-family: 'Barlow Condensed', sans-serif; font-size: .9rem; font-weight: 700; letter-spacing: .06em; }
+    .pill-a { background: rgba(168,192,0,.1); color: var(--green); border: 1px solid rgba(168,192,0,.25); }
+    .pill-p { background: rgba(96,170,255,.1); color: #60aaff; border: 1px solid rgba(96,170,255,.25); }
+    .pill-t { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--text); }
 
-    /* SPIN BUTTON */
-    .btn-spin {
-      background: var(--green); color: var(--dark);
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
-      letter-spacing: .1em; border: none; border-radius: 8px;
-      padding: 16px 60px; cursor: pointer;
-      box-shadow: 0 6px 30px rgba(168,192,0,.35);
-      transition: background .2s, transform .15s, box-shadow .2s;
-    }
-    .btn-spin:hover { background: var(--green2); transform: translateY(-2px); box-shadow: 0 10px 40px rgba(168,192,0,.5); }
-    .btn-spin:active { transform: translateY(0); }
-    .btn-spin:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; }
+    .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .leg-block { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; }
+    .leg-ttl { font-family: 'Barlow Condensed', sans-serif; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+    .leg-ttl.a { color: var(--green); } .leg-ttl.p { color: #60aaff; }
+    .leg-row { display: flex; justify-content: space-between; font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+    .leg-row:last-child { margin-bottom: 0; }
+    .leg-row b { color: var(--text); }
 
-    /* RESULT */
-    .result-box {
-      width: 100%; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 28px 24px; text-align: center;
-      display: none;
-      animation: fadeUp .4s ease both;
-    }
-    .result-box.visible { display: block; }
-    @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
-    .result-label { font-family: 'Barlow Condensed', sans-serif; font-size: .8rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .result-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: .06em; color: var(--green2); line-height: 1; }
+    .btn-confirm { width: 100%; background: var(--green); color: var(--dark); border: none; border-radius: 6px; padding: 16px; font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: .1em; cursor: pointer; transition: background .2s, transform .15s; box-shadow: 0 4px 20px rgba(168,192,0,.25); }
+    .btn-confirm:hover { background: var(--green2); transform: translateY(-2px); }
 
-    /* SEGMENTS EDITOR */
-    .editor-section {
-      width: 100%; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; overflow: hidden;
-    }
-    .editor-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px; border-bottom: 1px solid var(--border);
-    }
-    .editor-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: .1em; color: var(--green); }
-    .btn-add-seg {
-      background: rgba(168,192,0,.1); border: 1px solid rgba(168,192,0,.25);
-      color: var(--green); border-radius: 4px; padding: 7px 14px;
-      font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .08em;
-      text-transform: uppercase; cursor: pointer; transition: all .2s;
-    }
-    .btn-add-seg:hover { background: rgba(168,192,0,.2); }
+    /* PHASE SPIN */
+    #phase-spin { width: 100%; display: none; flex-direction: column; align-items: center; gap: 20px; }
+    .turn-bar { display: flex; align-items: center; gap: 10px; }
+    .turn-badge { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: .1em; padding: 6px 16px; border-radius: 20px; }
+    .turn-badge.a { background: rgba(168,192,0,.12); color: var(--green); border: 1px solid rgba(168,192,0,.25); }
+    .turn-badge.p { background: rgba(96,170,255,.12); color: #60aaff; border: 1px solid rgba(96,170,255,.25); }
+    .turn-sub { font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 
-    .segments-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
-    .seg-row { display: flex; align-items: center; gap: 10px; }
-    .seg-color { width: 28px; height: 28px; border-radius: 4px; border: 2px solid rgba(255,255,255,.1); cursor: pointer; flex-shrink: 0; }
-    .seg-input {
-      flex: 1; background: rgba(255,255,255,.04); border: 1px solid var(--border);
-      border-radius: 5px; color: var(--text); font-family: 'Barlow', sans-serif;
-      font-size: .95rem; padding: 8px 12px; outline: none; transition: border-color .2s;
-    }
-    .seg-input:focus { border-color: var(--green); }
-    .seg-del {
-      background: none; border: 1px solid var(--border); color: var(--muted);
-      border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: .8rem;
-      transition: all .2s; flex-shrink: 0;
-    }
-    .seg-del:hover { border-color: #c0392b; color: #c0392b; }
+    .wheel-wrap { position: relative; width: 340px; height: 340px; filter: drop-shadow(0 0 24px rgba(168,192,0,.2)); }
+    .ptr { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 24px solid var(--green2); filter: drop-shadow(0 0 6px rgba(200,232,0,.6)); z-index: 10; }
 
-    .editor-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
-    .btn-save-segs {
-      background: var(--green); color: var(--dark); border: none; border-radius: 5px;
-      padding: 10px 24px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
-      font-size: .95rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: background .2s;
-    }
-    .btn-save-segs:hover { background: var(--green2); }
+    .btn-spin { background: var(--green); color: var(--dark); font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .1em; border: none; border-radius: 8px; padding: 14px 56px; cursor: pointer; box-shadow: 0 6px 24px rgba(168,192,0,.35); transition: background .2s, transform .15s, box-shadow .2s; }
+    .btn-spin:hover:not(:disabled) { background: var(--green2); transform: translateY(-2px); box-shadow: 0 10px 36px rgba(168,192,0,.5); }
+    .btn-spin:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; font-size: 1rem; padding: 14px 32px; }
 
-    @media (max-width: 500px) {
-      .wheel-wrapper { width: 300px; height: 300px; }
-      nav { padding: 16px 20px; }
-    }
+    .result-toast { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; text-align: center; display: none; animation: fadeUp .35s ease both; }
+    .result-toast.visible { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+    .rt-label { font-family: 'Barlow Condensed', sans-serif; font-size: .78rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .rt-val { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; line-height: 1; }
+
+    .log { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+    .log-row { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 18px; animation: fadeUp .3s ease both; }
+    .log-n { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--muted); min-width: 24px; }
+    .log-t { font-family: 'Barlow Condensed', sans-serif; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 3px 10px; border-radius: 12px; }
+    .log-t.a { background: rgba(168,192,0,.1); color: var(--green); }
+    .log-t.p { background: rgba(96,170,255,.1); color: #60aaff; }
+    .log-v { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; margin-left: auto; }
+
+    @media (max-width: 480px) { .wheel-wrap { width: 280px; height: 280px; } nav { padding: 16px 20px; } .spin-opt label { width: 58px; height: 58px; font-size: 1.6rem; } }
   </style>
 </head>
 <body>
-
   <nav>
     <a id="back-link" href="index.html" class="back-btn">← Fiche joueur</a>
     <span class="nav-title">Roue du Destin</span>
   </nav>
-
-  <main id="main">
-    <p style="color:var(--muted);text-align:center;padding:40px">Chargement…</p>
-  </main>
+  <main id="main"><p style="color:var(--muted);text-align:center;padding:40px">Chargement…</p></main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -179,201 +120,213 @@
     });
     const db = firebase.firestore();
 
-    const params  = new URLSearchParams(window.location.search);
+    const params   = new URLSearchParams(window.location.search);
     const playerId = params.get('id');
-
-    const DEFAULT_SEGMENTS = [
-      { label: 'Bonne nouvelle',    color: '#a8c000' },
-      { label: 'Mauvaise nouvelle', color: '#c0392b' },
-      { label: 'Événement spécial', color: '#e8a000' },
-      { label: 'Rien ne se passe',  color: '#3a4a20' },
-      { label: 'Bonus stats',       color: '#2980b9' },
-      { label: 'Malus stats',       color: '#8e44ad' },
-    ];
-
-    let segments = [];
-    let spinning  = false;
-    let currentAngle = 0;
-    let canvas, ctx;
-
     document.getElementById('back-link').href = 'player.html?id=' + playerId;
+
+    // Roue Attributs : +1×5, +2×4, +3×3, +4×2, +5×1 = 15 segments
+    const ATTR_SEGS = [
+      ...Array(5).fill({ label:'+1', color:'#2d4a0a', val:1 }),
+      ...Array(4).fill({ label:'+2', color:'#486010' }),
+      ...Array(3).fill({ label:'+3', color:'#6a8c10' }),
+      ...Array(2).fill({ label:'+4', color:'#92b000' }),
+      ...Array(1).fill({ label:'+5', color:'#c8e800' }),
+    ].map(s => ({ ...s, val: parseInt(s.label) }));
+
+    // Roue Potentiel : +5×3, +10×2, +15×1 = 6 segments
+    const POT_SEGS = [
+      ...Array(3).fill({ label:'+5',  color:'#0e2a6e', val:5  }),
+      ...Array(2).fill({ label:'+10', color:'#1a52b8', val:10 }),
+      ...Array(1).fill({ label:'+15', color:'#60aaff', val:15 }),
+    ].map(s => ({ ...s }));
+
+    let spinQueue = [], currentSpin = 0, results = [], spinning = false, currentAngle = 0;
+    let canvas, ctx;
 
     async function init() {
       const doc = await db.collection('players').doc(playerId).get();
-      if (!doc.exists) { document.getElementById('main').innerHTML = '<p style="color:var(--muted);text-align:center;padding:40px">Joueur introuvable.</p>'; return; }
-
+      if (!doc.exists) { document.getElementById('main').innerHTML = '<p style="color:var(--muted);text-align:center;padding:60px">Joueur introuvable.</p>'; return; }
       const p = doc.data();
-      segments = p.wheelSegments || DEFAULT_SEGMENTS;
 
       document.getElementById('main').innerHTML = `
-        <!-- BANNER -->
         <div class="player-banner">
-          <div class="banner-pos">${p.position || '?'}</div>
+          <div class="banner-pos">${p.position||'?'}</div>
           <div>
             <div class="banner-name">${p.firstName} <span>${p.lastName.toUpperCase()}</span></div>
             <div class="banner-club">⚽ ${p.club}</div>
           </div>
         </div>
 
-        <!-- WHEEL -->
-        <div class="wheel-wrapper">
-          <div class="pointer"></div>
-          <canvas id="wheelCanvas" width="380" height="380"></canvas>
+        <div id="phase-select">
+          <div class="s-card">
+            <div class="s-title">Choix des tours</div>
+            <div class="s-body">
+              <p style="font-family:'Barlow Condensed',sans-serif;font-size:.88rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;text-align:center">Combien de tours pour les <b style="color:var(--green)">attributs</b> ?</p>
+              <div class="spin-options">
+                ${[1,2,3,4,5].map(n=>`
+                  <div class="spin-opt">
+                    <input type="radio" name="as" id="o${n}" value="${n}" ${n===3?'checked':''} onchange="updateRep()"/>
+                    <label for="o${n}">${n}<small>tour${n>1?'s':''}</small></label>
+                  </div>`).join('')}
+              </div>
+              <div class="repartition">
+                <span class="pill pill-a" id="pa">🎯 3 attributs</span>
+                <span style="color:var(--muted)">+</span>
+                <span class="pill pill-p" id="pp">📈 2 potentiel</span>
+                <span style="color:var(--muted)">=</span>
+                <span class="pill-t">5 tours</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="s-card">
+            <div class="s-title">Contenu des roues</div>
+            <div class="s-body">
+              <div class="legend-grid">
+                <div class="leg-block"><div class="leg-ttl a">🎯 Attributs</div>
+                  <div class="leg-row"><span>+1</span><b>× 5 cases</b></div>
+                  <div class="leg-row"><span>+2</span><b>× 4 cases</b></div>
+                  <div class="leg-row"><span>+3</span><b>× 3 cases</b></div>
+                  <div class="leg-row"><span>+4</span><b>× 2 cases</b></div>
+                  <div class="leg-row"><span>+5</span><b>× 1 case</b></div>
+                </div>
+                <div class="leg-block"><div class="leg-ttl p">📈 Potentiel</div>
+                  <div class="leg-row"><span>+5</span><b>× 3 cases</b></div>
+                  <div class="leg-row"><span>+10</span><b>× 2 cases</b></div>
+                  <div class="leg-row"><span>+15</span><b>× 1 case</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-confirm" onclick="startSpins()">🎰 Confirmer et lancer</button>
         </div>
 
-        <button class="btn-spin" id="btn-spin" onclick="spinWheel()">🎰 Lancer la roue</button>
-
-        <div class="result-box" id="result-box">
-          <div class="result-label">Résultat pour ${p.firstName} ${p.lastName}</div>
-          <div class="result-value" id="result-value"></div>
-        </div>
-
-        <!-- SEGMENTS EDITOR -->
-        <div class="editor-section">
-          <div class="editor-header">
-            <span class="editor-title">⚙ Segments de la roue</span>
-            <button class="btn-add-seg" onclick="addSegment()">+ Ajouter</button>
+        <div id="phase-spin">
+          <div class="turn-bar">
+            <div class="turn-badge a" id="tbadge">Tour 1 / 5</div>
+            <div class="turn-sub" id="tsub">Attributs</div>
           </div>
-          <div class="segments-list" id="segments-list"></div>
-          <div class="editor-footer">
-            <button class="btn-save-segs" onclick="saveSegments()">💾 Sauvegarder</button>
+          <div class="wheel-wrap">
+            <div class="ptr"></div>
+            <canvas id="wheelCanvas" width="340" height="340"></canvas>
           </div>
+          <button class="btn-spin" id="btn-spin" onclick="doSpin()">🎰 Lancer</button>
+          <div class="result-toast" id="rtost">
+            <div class="rt-label" id="rlabel"></div>
+            <div class="rt-val"   id="rval"></div>
+          </div>
+          <div class="log" id="log"></div>
         </div>
       `;
+      updateRep();
+    }
 
+    function updateRep() {
+      const v = parseInt(document.querySelector('input[name="as"]:checked')?.value||3);
+      document.getElementById('pa').textContent = `🎯 ${v} attribut${v>1?'s':''}`;
+      document.getElementById('pp').textContent = `📈 ${5-v} potentiel`;
+    }
+
+    function startSpins() {
+      const a = parseInt(document.querySelector('input[name="as"]:checked').value);
+      spinQueue    = [...Array(a).fill('a'), ...Array(5-a).fill('p')];
+      currentSpin  = 0; results = []; currentAngle = 0;
+      document.getElementById('phase-select').style.display = 'none';
+      const ps = document.getElementById('phase-spin');
+      ps.style.display = 'flex';
       canvas = document.getElementById('wheelCanvas');
       ctx    = canvas.getContext('2d');
-      renderSegmentsList();
-      drawWheel();
+      updateTurnUI();
+      drawWheel(spinQueue[0]);
     }
 
-    /* ── DRAW WHEEL ── */
-    function drawWheel() {
-      const n   = segments.length;
-      const cx  = canvas.width  / 2;
-      const cy  = canvas.height / 2;
-      const r   = cx - 4;
-      const arc = (2 * Math.PI) / n;
+    function updateTurnUI() {
+      const t = spinQueue[currentSpin];
+      const b = document.getElementById('tbadge');
+      b.textContent = `Tour ${currentSpin+1} / ${spinQueue.length}`;
+      b.className = `turn-badge ${t}`;
+      document.getElementById('tsub').textContent = t==='a' ? 'Attributs' : 'Potentiel';
+    }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      segments.forEach((seg, i) => {
-        const start = currentAngle + i * arc;
-        const end   = start + arc;
-
-        // slice
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, r, start, end);
-        ctx.closePath();
-        ctx.fillStyle = seg.color;
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,.3)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // label
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(start + arc / 2);
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 13px "Barlow Condensed", sans-serif';
-        ctx.shadowColor = 'rgba(0,0,0,.6)';
-        ctx.shadowBlur  = 4;
-        ctx.fillText(seg.label, r - 12, 5);
-        ctx.restore();
+    function drawWheel(type) {
+      const segs = type==='a' ? ATTR_SEGS : POT_SEGS;
+      const n=segs.length, cw=canvas.width, ch=canvas.height;
+      const cx=cw/2, cy=ch/2, r=cx-4, arc=(2*Math.PI)/n;
+      ctx.clearRect(0,0,cw,ch);
+      segs.forEach((seg,i)=>{
+        const s=currentAngle+i*arc, e=s+arc;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,s,e); ctx.closePath();
+        ctx.fillStyle=seg.color; ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,.3)'; ctx.lineWidth=2; ctx.stroke();
+        ctx.save(); ctx.translate(cx,cy); ctx.rotate(s+arc/2);
+        ctx.textAlign='right'; ctx.fillStyle='#fff';
+        ctx.font=`bold ${n>10?15:20}px "Bebas Neue",sans-serif`;
+        ctx.shadowColor='rgba(0,0,0,.7)'; ctx.shadowBlur=5;
+        ctx.fillText(seg.label,r-10,6); ctx.restore();
       });
-
-      // center circle
-      ctx.beginPath();
-      ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
-      ctx.fillStyle = '#0a0c06';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(168,192,0,.5)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx,cy,16,0,2*Math.PI);
+      ctx.fillStyle='#0a0c06'; ctx.fill();
+      ctx.strokeStyle='rgba(168,192,0,.5)'; ctx.lineWidth=2; ctx.stroke();
     }
 
-    /* ── SPIN ── */
-    function spinWheel() {
-      if (spinning || segments.length === 0) return;
-      spinning = true;
-      document.getElementById('btn-spin').disabled = true;
-      document.getElementById('result-box').classList.remove('visible');
-
-      const extraSpins  = 5 + Math.floor(Math.random() * 5);
-      const randomAngle = Math.random() * 2 * Math.PI;
-      const totalAngle  = extraSpins * 2 * Math.PI + randomAngle;
-      const duration    = 4000 + Math.random() * 1500;
-      const startTime   = performance.now();
-      const startAngle  = currentAngle;
-
-      function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
-
-      function animate(now) {
-        const elapsed  = now - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        currentAngle   = startAngle + totalAngle * easeOut(progress);
-        drawWheel();
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          spinning = false;
-          document.getElementById('btn-spin').disabled = false;
-          showResult();
-        }
+    function doSpin() {
+      if(spinning) return;
+      spinning=true;
+      document.getElementById('btn-spin').disabled=true;
+      document.getElementById('rtost').classList.remove('visible');
+      const type=spinQueue[currentSpin];
+      const extra=5+Math.floor(Math.random()*5);
+      const rand=Math.random()*2*Math.PI;
+      const total=extra*2*Math.PI+rand;
+      const dur=3500+Math.random()*1500;
+      const t0=performance.now(), a0=currentAngle;
+      const ease=t=>1-Math.pow(1-t,4);
+      function step(now){
+        const prog=Math.min((now-t0)/dur,1);
+        currentAngle=a0+total*ease(prog);
+        drawWheel(type);
+        if(prog<1){ requestAnimationFrame(step); } else { spinning=false; revealResult(type); }
       }
-      requestAnimationFrame(animate);
+      requestAnimationFrame(step);
     }
 
-    function showResult() {
-      const n   = segments.length;
-      const arc = (2 * Math.PI) / n;
-      // pointer is at top = -PI/2, find which segment is under it
-      const normalized = (((-currentAngle - Math.PI / 2) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-      const idx = Math.floor(normalized / arc) % n;
-      const seg = segments[idx];
+    function revealResult(type) {
+      const segs=type==='a'?ATTR_SEGS:POT_SEGS;
+      const n=segs.length, arc=(2*Math.PI)/n;
+      const norm=(((-currentAngle-Math.PI/2)%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+      const seg=segs[Math.floor(norm/arc)%n];
+      results.push({n:currentSpin+1,type,label:seg.label,val:seg.val});
+      currentSpin++;
 
-      const box = document.getElementById('result-box');
-      const val = document.getElementById('result-value');
-      val.textContent  = seg.label;
-      val.style.color  = seg.color;
-      box.classList.add('visible');
+      const toast=document.getElementById('rtost');
+      document.getElementById('rlabel').textContent=`Tour ${currentSpin} · ${type==='a'?'Attributs':'Potentiel'}`;
+      const rv=document.getElementById('rval');
+      rv.textContent=seg.label;
+      rv.style.color=type==='a'?'var(--green2)':'#60aaff';
+      toast.classList.remove('visible');
+      void toast.offsetWidth;
+      toast.classList.add('visible');
+      renderLog();
+
+      if(currentSpin<spinQueue.length){
+        updateTurnUI();
+        drawWheel(spinQueue[currentSpin]);
+        document.getElementById('btn-spin').disabled=false;
+      } else {
+        const btn=document.getElementById('btn-spin');
+        btn.textContent='✔ Tous les tours ont été effectués';
+        btn.disabled=true;
+      }
     }
 
-    /* ── SEGMENTS EDITOR ── */
-    function renderSegmentsList() {
-      const list = document.getElementById('segments-list');
-      list.innerHTML = segments.map((seg, i) => `
-        <div class="seg-row" id="seg-row-${i}">
-          <input type="color" class="seg-color" value="${seg.color}" onchange="updateSegColor(${i}, this.value)"/>
-          <input type="text"  class="seg-input" value="${seg.label}" oninput="updateSegLabel(${i}, this.value)" placeholder="Nom du segment"/>
-          <button class="seg-del" onclick="deleteSegment(${i})">✕</button>
+    function renderLog(){
+      document.getElementById('log').innerHTML=results.map(r=>`
+        <div class="log-row">
+          <span class="log-n">${r.n}</span>
+          <span class="log-t ${r.type}">${r.type==='a'?'Attributs':'Potentiel'}</span>
+          <span class="log-v" style="color:${r.type==='a'?'var(--green2)':'#60aaff'}">${r.label}</span>
         </div>`).join('');
-    }
-
-    function updateSegColor(i, val) { segments[i].color = val; drawWheel(); }
-    function updateSegLabel(i, val) { segments[i].label = val; drawWheel(); }
-
-    function addSegment() {
-      const colors = ['#a8c000','#c0392b','#e8a000','#2980b9','#8e44ad','#27ae60','#e67e22','#16a085'];
-      segments.push({ label: 'Nouveau segment', color: colors[segments.length % colors.length] });
-      renderSegmentsList();
-      drawWheel();
-    }
-
-    function deleteSegment(i) {
-      if (segments.length <= 2) { alert('Il faut au moins 2 segments.'); return; }
-      segments.splice(i, 1);
-      renderSegmentsList();
-      drawWheel();
-    }
-
-    async function saveSegments() {
-      await db.collection('players').doc(playerId).update({ wheelSegments: segments });
-      alert('✔ Roue sauvegardée pour ce joueur !');
     }
 
     init();
