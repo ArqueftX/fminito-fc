@@ -257,27 +257,47 @@
     <!-- rempli par JS -->
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
-    const STORAGE_KEY = 'fminito_players';
-    const flags = {
+    firebase.initializeApp({
+      apiKey: "AIzaSyA8Gx0rGa49jQQPUaMD8SSB0Duvh7b5Gkk",
+      authDomain: "fminito-fc.firebaseapp.com",
+      projectId: "fminito-fc",
+      storageBucket: "fminito-fc.firebasestorage.app",
+      messagingSenderId: "607684709890",
+      appId: "1:607684709890:web:9958dc52fe7d4c7bb0611b"
+    });
+    const db = firebase.firestore();
+
+    const flagMap = {
       'France':'🇫🇷','Espagne':'🇪🇸','Angleterre':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Allemagne':'🇩🇪','Italie':'🇮🇹',
       'Portugal':'🇵🇹','Belgique':'🇧🇪','Brésil':'🇧🇷','Argentine':'🇦🇷','Pays-Bas':'🇳🇱',
       'Maroc':'🇲🇦','Algérie':'🇩🇿','Tunisie':'🇹🇳','Sénégal':'🇸🇳','Cameroun':'🇨🇲',
       'USA':'🇺🇸','Japon':'🇯🇵','Croatie':'🇭🇷','Pologne':'🇵🇱','Serbie':'🇷🇸'
     };
-    function flag(c) { return (flags[c] || '🌍') + ' ' + c; }
+    function flag(c) { return (flagMap[c] || '🌍') + ' ' + c; }
 
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
-    const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const p = players.find(x => x.id === id);
 
-    if (!p) {
-      document.getElementById('content').innerHTML = `<p style="color:var(--muted);text-align:center;padding:60px">Joueur introuvable. <a href="index.html" style="color:var(--green)">Retour</a></p>`;
-    } else {
+    document.getElementById('content').innerHTML = `<p style="color:var(--muted);text-align:center;padding:60px">Chargement…</p>`;
+
+    async function loadPlayer() {
+      const allSnap = await db.collection('players').orderBy('createdAt').get();
+      const allPlayers = allSnap.docs;
+      const docRef = allPlayers.find(d => d.id === id);
+
+      if (!docRef) {
+        document.getElementById('content').innerHTML = `<p style="color:var(--muted);text-align:center;padding:60px">Joueur introuvable. <a href="index.html" style="color:var(--green)">Retour</a></p>`;
+        return;
+      }
+
+      const p = { id: docRef.id, ...docRef.data() };
+      const idx = allPlayers.findIndex(d => d.id === id) + 1;
+
       document.title = `${p.firstName} ${p.lastName} · FMinito FC`;
       const footLabel = p.foot === 'Droit' ? '🦵 Droit' : p.foot === 'Gauche' ? '🦵 Gauche' : '⚽ Ambidextre';
-      const idx = players.indexOf(p) + 1;
 
       document.getElementById('content').innerHTML = `
         <div class="edit-bar">
@@ -305,50 +325,23 @@
 
           <div class="profile-block">
             <div class="block-title">Physique</div>
-            <div class="stat-row">
-              <span class="stat-key">Taille</span>
-              <span class="stat-val">${p.height} cm</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-key">Poids</span>
-              <span class="stat-val">${p.weight} kg</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-key">IMC</span>
-              <span class="stat-val">${(p.weight / ((p.height/100)**2)).toFixed(1)}</span>
-            </div>
+            <div class="stat-row"><span class="stat-key">Taille</span><span class="stat-val">${p.height} cm</span></div>
+            <div class="stat-row"><span class="stat-key">Poids</span><span class="stat-val">${p.weight} kg</span></div>
+            <div class="stat-row"><span class="stat-key">IMC</span><span class="stat-val">${(p.weight / ((p.height/100)**2)).toFixed(1)}</span></div>
           </div>
 
           <div class="profile-block">
             <div class="block-title">Technique</div>
-            <div class="stat-row">
-              <span class="stat-key">Pied préféré</span>
-              <span class="stat-val"><span class="foot-pill">${footLabel}</span></span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-key">Poste</span>
-              <span class="stat-val">${p.position || '—'}</span>
-            </div>
+            <div class="stat-row"><span class="stat-key">Pied préféré</span><span class="stat-val"><span class="foot-pill">${footLabel}</span></span></div>
+            <div class="stat-row"><span class="stat-key">Poste</span><span class="stat-val">${p.position || '—'}</span></div>
           </div>
 
           <div class="profile-block full">
             <div class="block-title">Identité</div>
-            <div class="stat-row">
-              <span class="stat-key">Nom complet</span>
-              <span class="stat-val">${p.firstName} ${p.lastName}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-key">Nationalité</span>
-              <span class="stat-val">${flag(p.nationality1)}${p.nationality2 ? ' · ' + flag(p.nationality2) : ''}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-key">Club de départ</span>
-              <span class="stat-val">${p.club}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-key">Ajouté le</span>
-              <span class="stat-val">${new Date(p.createdAt).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}</span>
-            </div>
+            <div class="stat-row"><span class="stat-key">Nom complet</span><span class="stat-val">${p.firstName} ${p.lastName}</span></div>
+            <div class="stat-row"><span class="stat-key">Nationalité</span><span class="stat-val">${flag(p.nationality1)}${p.nationality2 ? ' · ' + flag(p.nationality2) : ''}</span></div>
+            <div class="stat-row"><span class="stat-key">Club de départ</span><span class="stat-val">${p.club}</span></div>
+            <div class="stat-row"><span class="stat-key">Ajouté le</span><span class="stat-val">${new Date(p.createdAt).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}</span></div>
           </div>
 
         </div>
@@ -365,54 +358,34 @@
               <line x1="10" y1="80" x2="150" y2="80" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
               <line x1="23" y1="23" x2="137" y2="137" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
               <line x1="137" y1="23" x2="23" y2="137" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
-              <polygon points="80,22 128,55 115,112 45,112 32,55"
-                fill="rgba(168,192,0,.2)" stroke="rgba(168,192,0,.5)" stroke-width="1.5"/>
+              <polygon points="80,22 128,55 115,112 45,112 32,55" fill="rgba(168,192,0,.2)" stroke="rgba(168,192,0,.5)" stroke-width="1.5"/>
             </svg>
-            <div class="lock-overlay">
-              <div class="lock-icon">🔒</div>
-            </div>
+            <div class="lock-overlay"><div class="lock-icon">🔒</div></div>
           </div>
           <div class="wheel-title">Roue des Attributs</div>
           <div class="wheel-sub">Notes FM · Tirs, Passes, Vitesse, Technique…</div>
-          <button class="btn-wheel" disabled>
-            <span class="lock">🔒</span> Fonctionnalité verrouillée
-          </button>
+          <button class="btn-wheel" disabled><span class="lock">🔒</span> Fonctionnalité verrouillée</button>
           <div><span class="coming-soon">Disponible prochainement</span></div>
         </div>
 
         <!-- BLOCS DU BAS -->
         <div class="bottom-grid">
-
-          <!-- NEWS -->
           <div class="bottom-block">
             <div class="bottom-block-header">
               <span class="bottom-icon">📰</span>
-              <div>
-                <div class="bottom-title">Récap des News</div>
-                <div class="bottom-sub">Toutes les actus Discord sur ce joueur</div>
-              </div>
+              <div><div class="bottom-title">Récap des News</div><div class="bottom-sub">Toutes les actus Discord sur ce joueur</div></div>
               <span class="bottom-lock">🔒</span>
             </div>
             <div class="bottom-preview">
-              <div class="preview-line"></div>
-              <div class="preview-line short"></div>
-              <div class="preview-line"></div>
-              <div class="preview-line shorter"></div>
-              <div class="preview-line"></div>
+              <div class="preview-line"></div><div class="preview-line short"></div>
+              <div class="preview-line"></div><div class="preview-line shorter"></div><div class="preview-line"></div>
             </div>
-            <div class="bottom-cta">
-              <button class="btn-bottom" disabled>🔒 Voir les news</button>
-            </div>
+            <div class="bottom-cta"><button class="btn-bottom" disabled>🔒 Voir les news</button></div>
           </div>
-
-          <!-- PERFORMANCES -->
           <div class="bottom-block">
             <div class="bottom-block-header">
               <span class="bottom-icon">📊</span>
-              <div>
-                <div class="bottom-title">Performances</div>
-                <div class="bottom-sub">Buts, passes déc., matchs joués…</div>
-              </div>
+              <div><div class="bottom-title">Performances</div><div class="bottom-sub">Buts, passes déc., matchs joués…</div></div>
               <span class="bottom-lock">🔒</span>
             </div>
             <div class="bottom-preview">
@@ -421,14 +394,13 @@
               <div class="perf-row"><span class="perf-label">Passes déc.</span><span class="perf-val perf-blur">—</span></div>
               <div class="perf-row"><span class="perf-label">Note moy.</span><span class="perf-val perf-blur">—</span></div>
             </div>
-            <div class="bottom-cta">
-              <button class="btn-bottom" disabled>🔒 Voir les performances</button>
-            </div>
+            <div class="bottom-cta"><button class="btn-bottom" disabled>🔒 Voir les performances</button></div>
           </div>
-
         </div>
       `;
     }
+
+    loadPlayer();
   </script>
 </body>
 </html>

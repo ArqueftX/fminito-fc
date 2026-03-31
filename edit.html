@@ -280,54 +280,59 @@
 
   <div class="toast" id="toast">✔ Joueur mis à jour !</div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
-    const STORAGE_KEY = 'fminito_players';
+    firebase.initializeApp({
+      apiKey: "AIzaSyA8Gx0rGa49jQQPUaMD8SSB0Duvh7b5Gkk",
+      authDomain: "fminito-fc.firebaseapp.com",
+      projectId: "fminito-fc",
+      storageBucket: "fminito-fc.firebasestorage.app",
+      messagingSenderId: "607684709890",
+      appId: "1:607684709890:web:9958dc52fe7d4c7bb0611b"
+    });
+    const db = firebase.firestore();
     const KNOWN_NATS = ['France','Espagne','Angleterre','Allemagne','Italie','Portugal','Belgique','Pays-Bas','Brésil','Argentine','Maroc','Algérie','Tunisie','Sénégal','Cameroun','USA','Japon','Croatie','Pologne','Serbie'];
 
     const params = new URLSearchParams(window.location.search);
     const playerId = params.get('id');
-    let player = null;
 
-    function loadPlayer() {
-      const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      player = players.find(p => p.id === playerId);
-      if (!player) { alert('Joueur introuvable.'); window.location.href = 'index.html'; return; }
+    async function loadPlayer() {
+      const doc = await db.collection('players').doc(playerId).get();
+      if (!doc.exists) { alert('Joueur introuvable.'); window.location.href = 'index.html'; return; }
+      const p = doc.data();
 
-      document.getElementById('firstName').value = player.firstName || '';
-      document.getElementById('lastName').value  = player.lastName  || '';
-      document.getElementById('height').value    = player.height    || '';
-      document.getElementById('weight').value    = player.weight    || '';
-      document.getElementById('club').value      = player.club      || '';
+      document.getElementById('firstName').value = p.firstName || '';
+      document.getElementById('lastName').value  = p.lastName  || '';
+      document.getElementById('height').value    = p.height    || '';
+      document.getElementById('weight').value    = p.weight    || '';
+      document.getElementById('club').value      = p.club      || '';
 
-      // Foot
-      const footEl = document.querySelector(`input[name="foot"][value="${player.foot}"]`);
+      const footEl = document.querySelector(`input[name="foot"][value="${p.foot}"]`);
       if (footEl) footEl.checked = true;
 
-      // Position
-      if (player.position) {
-        const posEl = document.querySelector(`input[name="position"][value="${player.position}"]`);
+      if (p.position) {
+        const posEl = document.querySelector(`input[name="position"][value="${p.position}"]`);
         if (posEl) posEl.checked = true;
       }
 
-      // Nat 1
-      if (KNOWN_NATS.includes(player.nationality1)) {
-        document.getElementById('nationality1').value = player.nationality1;
-      } else if (player.nationality1) {
+      if (KNOWN_NATS.includes(p.nationality1)) {
+        document.getElementById('nationality1').value = p.nationality1;
+      } else if (p.nationality1) {
         document.getElementById('nationality1').value = 'Autre';
         document.getElementById('customNat1').classList.add('visible');
-        document.getElementById('customNat1Input').value = player.nationality1;
+        document.getElementById('customNat1Input').value = p.nationality1;
       }
 
-      // Nat 2
-      if (player.nationality2) {
+      if (p.nationality2) {
         document.getElementById('hasNat2').checked = true;
         document.getElementById('nat2-container').classList.add('visible');
-        if (KNOWN_NATS.includes(player.nationality2)) {
-          document.getElementById('nationality2').value = player.nationality2;
+        if (KNOWN_NATS.includes(p.nationality2)) {
+          document.getElementById('nationality2').value = p.nationality2;
         } else {
           document.getElementById('nationality2').value = 'Autre';
           document.getElementById('customNat2').classList.add('visible');
-          document.getElementById('customNat2Input').value = player.nationality2;
+          document.getElementById('customNat2Input').value = p.nationality2;
         }
       }
     }
@@ -351,9 +356,9 @@
     function getVal(id) { return document.getElementById(id)?.value?.trim() || ''; }
     function setError(id, hasError) { const el = document.getElementById(id); if (el) el.classList.toggle('error', hasError); }
 
-    function saveEdit() {
-      const firstName = getVal('firstName');
-      const lastName  = getVal('lastName');
+    async function saveEdit() {
+      const firstName  = getVal('firstName');
+      const lastName   = getVal('lastName');
       let nationality1 = getVal('nationality1');
       if (nationality1 === 'Autre') nationality1 = getVal('customNat1Input') || 'Autre';
       let nationality2 = '';
@@ -379,12 +384,11 @@
       if (errors.length > 0) { document.getElementById('formError').classList.add('visible'); return; }
       document.getElementById('formError').classList.remove('visible');
 
-      const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      const idx = players.findIndex(p => p.id === playerId);
-      if (idx === -1) { alert('Joueur introuvable.'); return; }
-
-      players[idx] = { ...players[idx], firstName, lastName, nationality1, nationality2, height: parseInt(height), weight: parseInt(weight), foot, club, position };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+      await db.collection('players').doc(playerId).update({
+        firstName, lastName, nationality1, nationality2,
+        height: parseInt(height), weight: parseInt(weight),
+        foot, club, position
+      });
 
       const toast = document.getElementById('toast');
       toast.classList.add('show');

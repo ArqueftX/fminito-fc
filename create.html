@@ -587,22 +587,29 @@
 
   <div class="toast" id="toast">✔ Joueur ajouté à l'effectif !</div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
-    const STORAGE_KEY = 'fminito_players';
+    firebase.initializeApp({
+      apiKey: "AIzaSyA8Gx0rGa49jQQPUaMD8SSB0Duvh7b5Gkk",
+      authDomain: "fminito-fc.firebaseapp.com",
+      projectId: "fminito-fc",
+      storageBucket: "fminito-fc.firebasestorage.app",
+      messagingSenderId: "607684709890",
+      appId: "1:607684709890:web:9958dc52fe7d4c7bb0611b"
+    });
+    const db = firebase.firestore();
 
     function toggleCustomNat(selectId, containerId) {
       const val = document.getElementById(selectId).value;
       const container = document.getElementById(containerId);
       container.classList.toggle('visible', val === 'Autre');
-      if (val !== 'Autre') {
-        document.getElementById(containerId + 'Input').value = '';
-      }
+      if (val !== 'Autre') document.getElementById(containerId + 'Input').value = '';
     }
 
     function toggleNat2() {
       const checked = document.getElementById('hasNat2').checked;
-      const container = document.getElementById('nat2-container');
-      container.classList.toggle('visible', checked);
+      document.getElementById('nat2-container').classList.toggle('visible', checked);
       if (!checked) {
         document.getElementById('nationality2').value = '';
         document.getElementById('customNat2').classList.remove('visible');
@@ -610,63 +617,43 @@
       }
     }
 
-    function getVal(id) {
-      return document.getElementById(id)?.value?.trim() || '';
-    }
+    function getVal(id) { return document.getElementById(id)?.value?.trim() || ''; }
+    function setError(id, hasError) { const el = document.getElementById(id); if (el) el.classList.toggle('error', hasError); }
 
-    function setError(id, hasError) {
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle('error', hasError);
-    }
-
-    function submitForm() {
+    async function submitForm() {
       const firstName   = getVal('firstName');
       const lastName    = getVal('lastName');
-      let nationality1 = getVal('nationality1');
+      let nationality1  = getVal('nationality1');
       if (nationality1 === 'Autre') nationality1 = getVal('customNat1Input') || 'Autre';
-      let nationality2 = '';
+      let nationality2  = '';
       if (document.getElementById('hasNat2').checked) {
         nationality2 = getVal('nationality2');
         if (nationality2 === 'Autre') nationality2 = getVal('customNat2Input') || 'Autre';
       }
-      const height      = getVal('height');
-      const weight      = getVal('weight');
-      const club        = getVal('club');
-      const foot        = document.querySelector('input[name="foot"]:checked')?.value || '';
-      const position    = document.querySelector('input[name="position"]:checked')?.value || '';
+      const height   = getVal('height');
+      const weight   = getVal('weight');
+      const club     = getVal('club');
+      const foot     = document.querySelector('input[name="foot"]:checked')?.value || '';
+      const position = document.querySelector('input[name="position"]:checked')?.value || '';
 
       const errors = [
-        !firstName && 'firstName',
-        !lastName  && 'lastName',
-        !nationality1 && 'nationality1',
-        !height    && 'height',
-        !weight    && 'weight',
-        !club      && 'club',
-        !position  && 'position',
+        !firstName && 'firstName', !lastName && 'lastName',
+        !nationality1 && 'nationality1', !height && 'height',
+        !weight && 'weight', !club && 'club', !position && 'position',
       ].filter(Boolean);
 
       ['firstName','lastName','nationality1','height','weight','club'].forEach(id => setError(id, false));
       errors.forEach(id => setError(id, true));
 
-      const errMsg = document.getElementById('formError');
-      if (errors.length > 0) {
-        errMsg.classList.add('visible');
-        return;
-      }
-      errMsg.classList.remove('visible');
+      if (errors.length > 0) { document.getElementById('formError').classList.add('visible'); return; }
+      document.getElementById('formError').classList.remove('visible');
 
-      const player = {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      await db.collection('players').add({
         firstName, lastName, nationality1, nationality2,
-        height: parseInt(height),
-        weight: parseInt(weight),
+        height: parseInt(height), weight: parseInt(weight),
         foot, club, position,
         createdAt: new Date().toISOString()
-      };
-
-      const players = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      players.push(player);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+      });
 
       const toast = document.getElementById('toast');
       toast.classList.add('show');

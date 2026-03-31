@@ -390,23 +390,22 @@
 
   <footer>FMinito FC · FM26 · créée avec pa$$ion, ah bah non</footer>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
-    const STORAGE_KEY = 'fminito_players';
+    firebase.initializeApp({
+      apiKey: "AIzaSyA8Gx0rGa49jQQPUaMD8SSB0Duvh7b5Gkk",
+      authDomain: "fminito-fc.firebaseapp.com",
+      projectId: "fminito-fc",
+      storageBucket: "fminito-fc.firebasestorage.app",
+      messagingSenderId: "607684709890",
+      appId: "1:607684709890:web:9958dc52fe7d4c7bb0611b"
+    });
+    const db = firebase.firestore();
 
-    function getPlayers() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-      catch { return []; }
-    }
-
-    function savePlayers(players) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-    }
-
-    function deletePlayer(id) {
+    async function deletePlayer(id) {
       if (!confirm('Supprimer ce joueur ?')) return;
-      const players = getPlayers().filter(p => p.id !== id);
-      savePlayers(players);
-      render();
+      await db.collection('players').doc(id).delete();
     }
 
     function footIcon(foot) {
@@ -425,8 +424,7 @@
       return (flags[country] || '🌍') + ' ' + country;
     }
 
-    function render() {
-      const players = getPlayers();
+    function render(players) {
       const container = document.getElementById('roster');
 
       if (players.length === 0) {
@@ -472,7 +470,12 @@
       }</div>`;
     }
 
-    render();
+    // Écoute en temps réel — se met à jour automatiquement pour tout le monde
+    document.getElementById('roster').innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px">Chargement…</p>`;
+    db.collection('players').orderBy('createdAt').onSnapshot(snapshot => {
+      const players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      render(players);
+    });
   </script>
 </body>
 </html>
