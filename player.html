@@ -207,6 +207,34 @@
       color: var(--muted); opacity: .5;
     }
 
+    /* WHEEL TOP BAR */
+    .wheel-top-bar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+    .btn-admin-wheel {
+      background: rgba(168,192,0,.08); border: 1px solid rgba(168,192,0,.2);
+      color: var(--muted); border-radius: 5px; padding: 8px 14px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: .82rem; letter-spacing: .08em;
+      text-transform: uppercase; cursor: pointer; transition: all .2s; flex-shrink: 0;
+    }
+    .btn-admin-wheel:hover { color: var(--green); border-color: var(--green); }
+
+    /* ADMIN MODAL */
+    #admin-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); }
+    .modal-box { position: relative; z-index: 1; background: #1a2008; border: 1px solid var(--border); border-radius: 12px; width: min(500px, 95vw); max-height: 85vh; overflow-y: auto; padding: 28px; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .08em; color: var(--green); }
+    .modal-close { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: .9rem; transition: all .2s; }
+    .modal-close:hover { border-color: #c0392b; color: #c0392b; }
+    .modal-subtitle { font-family: 'Barlow Condensed', sans-serif; font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+    .modal-grid { display: flex; flex-direction: column; gap: 14px; }
+    .modal-field label { font-family: 'Barlow Condensed', sans-serif; font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+    .attr-input-row { display: flex; align-items: center; gap: 12px; }
+    .attr-input-row input[type="range"] { flex: 1; accent-color: var(--green); cursor: pointer; }
+    .attr-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: var(--green2); min-width: 24px; text-align: center; }
+    .modal-footer { margin-top: 24px; display: flex; justify-content: flex-end; }
+    .modal-save { background: var(--green); color: var(--dark); border: none; border-radius: 5px; padding: 12px 28px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+    .modal-save:hover { background: var(--green2); }
+
     /* BOTTOM GRID */
     .bottom-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;
@@ -389,25 +417,24 @@
         </div>
 
         <!-- ROUE DES ATTRIBUTS -->
-        <div class="wheel-section">
-          <div class="wheel-preview">
-            <svg viewBox="0 0 160 160" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(168,192,0,.15)" stroke-width="1"/>
-              <circle cx="80" cy="80" r="52" fill="none" stroke="rgba(168,192,0,.12)" stroke-width="1"/>
-              <circle cx="80" cy="80" r="35" fill="none" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
-              <circle cx="80" cy="80" r="18" fill="none" stroke="rgba(168,192,0,.08)" stroke-width="1"/>
-              <line x1="80" y1="10" x2="80" y2="150" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
-              <line x1="10" y1="80" x2="150" y2="80" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
-              <line x1="23" y1="23" x2="137" y2="137" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
-              <line x1="137" y1="23" x2="23" y2="137" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
-              <polygon points="80,22 128,55 115,112 45,112 32,55" fill="rgba(168,192,0,.2)" stroke="rgba(168,192,0,.5)" stroke-width="1.5"/>
-            </svg>
-            <div class="lock-overlay"><div class="lock-icon">🔒</div></div>
+        <div class="wheel-section" id="wheel-section">
+          <div class="wheel-top-bar">
+            <div>
+              <div class="wheel-title">Roue des Attributs</div>
+              <div class="wheel-sub">Notes FM · Tirs, Passes, Vitesse, Technique…</div>
+            </div>
+            <button class="btn-admin-wheel" onclick="adminOpenWheel()">⚙ Admin</button>
           </div>
-          <div class="wheel-title">Roue des Attributs</div>
-          <div class="wheel-sub">Notes FM · Tirs, Passes, Vitesse, Technique…</div>
-          <button class="btn-wheel" disabled><span class="lock">🔒</span> Fonctionnalité verrouillée</button>
-          <div><span class="coming-soon">Disponible prochainement</span></div>
+          <div class="wheel-preview">
+            <svg id="radar-svg" viewBox="0 0 260 260" width="260" height="260" xmlns="http://www.w3.org/2000/svg">
+              ${buildRadarSVG(p.attributes || null, true)}
+            </svg>
+            <div class="lock-overlay" id="lock-overlay"><div class="lock-icon">🔒</div></div>
+          </div>
+          <div id="wheel-status">
+            <button class="btn-wheel" disabled><span class="lock">🔒</span> Fonctionnalité verrouillée</button>
+            <div><span class="coming-soon">Disponible prochainement</span></div>
+          </div>
         </div>
 
         <!-- BLOCS DU BAS -->
@@ -440,6 +467,128 @@
           </div>
         </div>
       `;
+    }
+
+    const ATTRS = [
+      { key: 'vitesse',    label: 'Vitesse'    },
+      { key: 'tirs',       label: 'Tirs'       },
+      { key: 'passes',     label: 'Passes'     },
+      { key: 'dribbles',   label: 'Dribbles'   },
+      { key: 'defense',    label: 'Défense'    },
+      { key: 'physique',   label: 'Physique'   },
+      { key: 'mental',     label: 'Mental'     },
+      { key: 'technique',  label: 'Technique'  },
+    ];
+    const CX = 130, CY = 130, R = 100;
+
+    function radarPoint(i, n, val, max) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      const r = (val / max) * R;
+      return { x: CX + r * Math.cos(angle), y: CY + r * Math.sin(angle) };
+    }
+
+    function buildRadarSVG(attrs, blurred) {
+      const n = ATTRS.length;
+      const max = 20;
+      let svg = '';
+
+      // grid circles
+      [0.25, 0.5, 0.75, 1].forEach(frac => {
+        svg += `<circle cx="${CX}" cy="${CY}" r="${R * frac}" fill="none" stroke="rgba(168,192,0,.1)" stroke-width="1"/>`;
+      });
+
+      // axes + labels
+      ATTRS.forEach((a, i) => {
+        const end = radarPoint(i, n, max, max);
+        svg += `<line x1="${CX}" y1="${CY}" x2="${end.x}" y2="${end.y}" stroke="rgba(168,192,0,.12)" stroke-width="1"/>`;
+        const lbl = radarPoint(i, n, max * 1.18, max);
+        svg += `<text x="${lbl.x}" y="${lbl.y}" text-anchor="middle" dominant-baseline="middle"
+          font-family="Barlow Condensed,sans-serif" font-size="10" fill="rgba(168,192,0,.5)"
+          letter-spacing="1">${a.label.toUpperCase()}</text>`;
+      });
+
+      // polygon
+      if (attrs) {
+        const pts = ATTRS.map((a, i) => {
+          const val = Math.min(max, Math.max(0, attrs[a.key] || 0));
+          const p = radarPoint(i, n, val, max);
+          return `${p.x},${p.y}`;
+        }).join(' ');
+        const filter = blurred ? 'filter="url(#blur)"' : '';
+        svg += `<defs><filter id="blur"><feGaussianBlur stdDeviation="3"/></filter></defs>`;
+        svg += `<polygon points="${pts}" fill="rgba(168,192,0,.25)" stroke="rgba(168,192,0,.7)" stroke-width="1.5" ${filter}/>`;
+        if (!blurred) {
+          ATTRS.forEach((a, i) => {
+            const val = Math.min(max, Math.max(0, attrs[a.key] || 0));
+            const p = radarPoint(i, n, val, max);
+            svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--green2)"/>`;
+          });
+        }
+      } else {
+        // placeholder blob
+        const pts = ATTRS.map((a, i) => {
+          const val = 8 + Math.sin(i * 1.3) * 4;
+          const p = radarPoint(i, n, val, max);
+          return `${p.x},${p.y}`;
+        }).join(' ');
+        svg += `<defs><filter id="blur"><feGaussianBlur stdDeviation="3"/></filter></defs>`;
+        svg += `<polygon points="${pts}" fill="rgba(168,192,0,.15)" stroke="rgba(168,192,0,.3)" stroke-width="1.5" filter="url(#blur)"/>`;
+      }
+      return svg;
+    }
+
+    async function adminOpenWheel() {
+      const pwd = prompt('Mot de passe admin :');
+      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+
+      const doc = await db.collection('players').doc(id).get();
+      const cur = doc.data().attributes || {};
+
+      // Build modal
+      const modal = document.createElement('div');
+      modal.id = 'admin-modal';
+      modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-box">
+          <div class="modal-header">
+            <span class="modal-title">⚙ Attributs du joueur</span>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+          </div>
+          <div class="modal-subtitle">Valeurs FM de 1 à 20</div>
+          <div class="modal-grid">
+            ${ATTRS.map(a => `
+              <div class="modal-field">
+                <label>${a.label}</label>
+                <div class="attr-input-row">
+                  <input type="range" min="1" max="20" value="${cur[a.key] || 10}"
+                    id="attr-${a.key}" oninput="document.getElementById('val-${a.key}').textContent=this.value"/>
+                  <span class="attr-val" id="val-${a.key}">${cur[a.key] || 10}</span>
+                </div>
+              </div>`).join('')}
+          </div>
+          <div class="modal-footer">
+            <button class="modal-save" onclick="saveAttributes()">✔ Enregistrer</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+
+    function closeModal() {
+      const m = document.getElementById('admin-modal');
+      if (m) m.remove();
+    }
+
+    async function saveAttributes() {
+      const attrs = {};
+      ATTRS.forEach(a => {
+        attrs[a.key] = parseInt(document.getElementById('attr-' + a.key).value);
+      });
+      await db.collection('players').doc(id).update({ attributes: attrs });
+
+      // Refresh radar
+      document.getElementById('radar-svg').innerHTML = buildRadarSVG(attrs, true);
+      closeModal();
+      alert('✔ Attributs sauvegardés !');
     }
 
     async function adminEditRatings() {
