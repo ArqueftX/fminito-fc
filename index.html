@@ -404,6 +404,8 @@
     const db = firebase.firestore();
 
     async function deletePlayer(id) {
+      const pwd = prompt('Mot de passe admin :');
+      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
       if (!confirm('Supprimer ce joueur ?')) return;
       await db.collection('players').doc(id).delete();
     }
