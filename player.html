@@ -423,7 +423,7 @@
               <div class="wheel-title">Roue du Destin</div>
               <div class="wheel-sub">Fonctionnalité verrouillée · Admin uniquement</div>
             </div>
-            <button class="btn-admin-wheel" onclick="adminOpenWheel()">⚙ Admin</button>
+            <button class="btn-admin-wheel" onclick="adminOpenWheel()">🎰 Roue du Destin</button>
           </div>
           <div class="wheel-preview">
             <svg viewBox="0 0 260 260" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -476,8 +476,6 @@
     }
 
     async function adminOpenWheel() {
-      const pwd = prompt('Mot de passe admin :');
-      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
       window.location.href = 'wheel.html?id=' + id;
     }
 
