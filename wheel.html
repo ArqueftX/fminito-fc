@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roue du Destin · FMinito FC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:  #a8c000;
+      --green2: #c8e800;
+      --dark:   #0a0c06;
+      --card:   #181d0e;
+      --border: #2a3010;
+      --text:   #e8edcc;
+      --muted:  #7a8555;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--dark); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        repeating-linear-gradient(180deg, transparent 0px, transparent 58px, rgba(168,192,0,.04) 58px, rgba(168,192,0,.04) 60px),
+        repeating-linear-gradient(90deg, transparent 0px, transparent 118px, rgba(168,192,0,.03) 118px, rgba(168,192,0,.03) 120px);
+      pointer-events: none; z-index: 0;
+    }
+
+    nav {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+    }
+    .back-btn {
+      display: flex; align-items: center; gap: 8px; color: var(--muted);
+      text-decoration: none; font-family: 'Barlow Condensed', sans-serif;
+      font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; transition: color .2s;
+    }
+    .back-btn:hover { color: var(--green); }
+    .nav-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .1em; color: var(--green); margin-left: auto; }
+
+    main {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 40px 24px 80px;
+      display: flex; flex-direction: column; align-items: center; gap: 32px;
+    }
+
+    /* PLAYER BANNER */
+    .player-banner {
+      width: 100%;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 18px 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .banner-pos {
+      font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--green);
+      background: rgba(168,192,0,.08); border: 1px solid rgba(168,192,0,.2);
+      border-radius: 6px; padding: 4px 14px; line-height: 1.2;
+    }
+    .banner-name {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .05em;
+    }
+    .banner-name span { color: var(--green); }
+    .banner-club { font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+    /* WHEEL WRAPPER */
+    .wheel-wrapper {
+      position: relative; width: 380px; height: 380px;
+      filter: drop-shadow(0 0 30px rgba(168,192,0,.2));
+    }
+
+    /* POINTER */
+    .pointer {
+      position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 28px solid var(--green2);
+      filter: drop-shadow(0 0 6px rgba(200,232,0,.6));
+      z-index: 10;
+    }
+
+    canvas#wheelCanvas { border-radius: 50%; display: block; }
+
+    /* SPIN BUTTON */
+    .btn-spin {
+      background: var(--green); color: var(--dark);
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
+      letter-spacing: .1em; border: none; border-radius: 8px;
+      padding: 16px 60px; cursor: pointer;
+      box-shadow: 0 6px 30px rgba(168,192,0,.35);
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-spin:hover { background: var(--green2); transform: translateY(-2px); box-shadow: 0 10px 40px rgba(168,192,0,.5); }
+    .btn-spin:active { transform: translateY(0); }
+    .btn-spin:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; }
+
+    /* RESULT */
+    .result-box {
+      width: 100%; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 28px 24px; text-align: center;
+      display: none;
+      animation: fadeUp .4s ease both;
+    }
+    .result-box.visible { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+    .result-label { font-family: 'Barlow Condensed', sans-serif; font-size: .8rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .result-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: .06em; color: var(--green2); line-height: 1; }
+
+    /* SEGMENTS EDITOR */
+    .editor-section {
+      width: 100%; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .editor-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .editor-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: .1em; color: var(--green); }
+    .btn-add-seg {
+      background: rgba(168,192,0,.1); border: 1px solid rgba(168,192,0,.25);
+      color: var(--green); border-radius: 4px; padding: 7px 14px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .08em;
+      text-transform: uppercase; cursor: pointer; transition: all .2s;
+    }
+    .btn-add-seg:hover { background: rgba(168,192,0,.2); }
+
+    .segments-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .seg-row { display: flex; align-items: center; gap: 10px; }
+    .seg-color { width: 28px; height: 28px; border-radius: 4px; border: 2px solid rgba(255,255,255,.1); cursor: pointer; flex-shrink: 0; }
+    .seg-input {
+      flex: 1; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 5px; color: var(--text); font-family: 'Barlow', sans-serif;
+      font-size: .95rem; padding: 8px 12px; outline: none; transition: border-color .2s;
+    }
+    .seg-input:focus { border-color: var(--green); }
+    .seg-del {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: .8rem;
+      transition: all .2s; flex-shrink: 0;
+    }
+    .seg-del:hover { border-color: #c0392b; color: #c0392b; }
+
+    .editor-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+    .btn-save-segs {
+      background: var(--green); color: var(--dark); border: none; border-radius: 5px;
+      padding: 10px 24px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: .95rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: background .2s;
+    }
+    .btn-save-segs:hover { background: var(--green2); }
+
+    @media (max-width: 500px) {
+      .wheel-wrapper { width: 300px; height: 300px; }
+      nav { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a id="back-link" href="index.html" class="back-btn">← Fiche joueur</a>
+    <span class="nav-title">Roue du Destin</span>
+  </nav>
+
+  <main id="main">
+    <p style="color:var(--muted);text-align:center;padding:40px">Chargement…</p>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyA8Gx0rGa49jQQPUaMD8SSB0Duvh7b5Gkk",
+      authDomain: "fminito-fc.firebaseapp.com",
+      projectId: "fminito-fc",
+      storageBucket: "fminito-fc.firebasestorage.app",
+      messagingSenderId: "607684709890",
+      appId: "1:607684709890:web:9958dc52fe7d4c7bb0611b"
+    });
+    const db = firebase.firestore();
+
+    const params  = new URLSearchParams(window.location.search);
+    const playerId = params.get('id');
+
+    const DEFAULT_SEGMENTS = [
+      { label: 'Bonne nouvelle',    color: '#a8c000' },
+      { label: 'Mauvaise nouvelle', color: '#c0392b' },
+      { label: 'Événement spécial', color: '#e8a000' },
+      { label: 'Rien ne se passe',  color: '#3a4a20' },
+      { label: 'Bonus stats',       color: '#2980b9' },
+      { label: 'Malus stats',       color: '#8e44ad' },
+    ];
+
+    let segments = [];
+    let spinning  = false;
+    let currentAngle = 0;
+    let canvas, ctx;
+
+    document.getElementById('back-link').href = 'player.html?id=' + playerId;
+
+    async function init() {
+      const doc = await db.collection('players').doc(playerId).get();
+      if (!doc.exists) { document.getElementById('main').innerHTML = '<p style="color:var(--muted);text-align:center;padding:40px">Joueur introuvable.</p>'; return; }
+
+      const p = doc.data();
+      segments = p.wheelSegments || DEFAULT_SEGMENTS;
+
+      document.getElementById('main').innerHTML = `
+        <!-- BANNER -->
+        <div class="player-banner">
+          <div class="banner-pos">${p.position || '?'}</div>
+          <div>
+            <div class="banner-name">${p.firstName} <span>${p.lastName.toUpperCase()}</span></div>
+            <div class="banner-club">⚽ ${p.club}</div>
+          </div>
+        </div>
+
+        <!-- WHEEL -->
+        <div class="wheel-wrapper">
+          <div class="pointer"></div>
+          <canvas id="wheelCanvas" width="380" height="380"></canvas>
+        </div>
+
+        <button class="btn-spin" id="btn-spin" onclick="spinWheel()">🎰 Lancer la roue</button>
+
+        <div class="result-box" id="result-box">
+          <div class="result-label">Résultat pour ${p.firstName} ${p.lastName}</div>
+          <div class="result-value" id="result-value"></div>
+        </div>
+
+        <!-- SEGMENTS EDITOR -->
+        <div class="editor-section">
+          <div class="editor-header">
+            <span class="editor-title">⚙ Segments de la roue</span>
+            <button class="btn-add-seg" onclick="addSegment()">+ Ajouter</button>
+          </div>
+          <div class="segments-list" id="segments-list"></div>
+          <div class="editor-footer">
+            <button class="btn-save-segs" onclick="saveSegments()">💾 Sauvegarder</button>
+          </div>
+        </div>
+      `;
+
+      canvas = document.getElementById('wheelCanvas');
+      ctx    = canvas.getContext('2d');
+      renderSegmentsList();
+      drawWheel();
+    }
+
+    /* ── DRAW WHEEL ── */
+    function drawWheel() {
+      const n   = segments.length;
+      const cx  = canvas.width  / 2;
+      const cy  = canvas.height / 2;
+      const r   = cx - 4;
+      const arc = (2 * Math.PI) / n;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      segments.forEach((seg, i) => {
+        const start = currentAngle + i * arc;
+        const end   = start + arc;
+
+        // slice
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, start, end);
+        ctx.closePath();
+        ctx.fillStyle = seg.color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,.3)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // label
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(start + arc / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px "Barlow Condensed", sans-serif';
+        ctx.shadowColor = 'rgba(0,0,0,.6)';
+        ctx.shadowBlur  = 4;
+        ctx.fillText(seg.label, r - 12, 5);
+        ctx.restore();
+      });
+
+      // center circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+      ctx.fillStyle = '#0a0c06';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(168,192,0,.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    /* ── SPIN ── */
+    function spinWheel() {
+      if (spinning || segments.length === 0) return;
+      spinning = true;
+      document.getElementById('btn-spin').disabled = true;
+      document.getElementById('result-box').classList.remove('visible');
+
+      const extraSpins  = 5 + Math.floor(Math.random() * 5);
+      const randomAngle = Math.random() * 2 * Math.PI;
+      const totalAngle  = extraSpins * 2 * Math.PI + randomAngle;
+      const duration    = 4000 + Math.random() * 1500;
+      const startTime   = performance.now();
+      const startAngle  = currentAngle;
+
+      function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+      function animate(now) {
+        const elapsed  = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        currentAngle   = startAngle + totalAngle * easeOut(progress);
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          document.getElementById('btn-spin').disabled = false;
+          showResult();
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function showResult() {
+      const n   = segments.length;
+      const arc = (2 * Math.PI) / n;
+      // pointer is at top = -PI/2, find which segment is under it
+      const normalized = (((-currentAngle - Math.PI / 2) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      const idx = Math.floor(normalized / arc) % n;
+      const seg = segments[idx];
+
+      const box = document.getElementById('result-box');
+      const val = document.getElementById('result-value');
+      val.textContent  = seg.label;
+      val.style.color  = seg.color;
+      box.classList.add('visible');
+    }
+
+    /* ── SEGMENTS EDITOR ── */
+    function renderSegmentsList() {
+      const list = document.getElementById('segments-list');
+      list.innerHTML = segments.map((seg, i) => `
+        <div class="seg-row" id="seg-row-${i}">
+          <input type="color" class="seg-color" value="${seg.color}" onchange="updateSegColor(${i}, this.value)"/>
+          <input type="text"  class="seg-input" value="${seg.label}" oninput="updateSegLabel(${i}, this.value)" placeholder="Nom du segment"/>
+          <button class="seg-del" onclick="deleteSegment(${i})">✕</button>
+        </div>`).join('');
+    }
+
+    function updateSegColor(i, val) { segments[i].color = val; drawWheel(); }
+    function updateSegLabel(i, val) { segments[i].label = val; drawWheel(); }
+
+    function addSegment() {
+      const colors = ['#a8c000','#c0392b','#e8a000','#2980b9','#8e44ad','#27ae60','#e67e22','#16a085'];
+      segments.push({ label: 'Nouveau segment', color: colors[segments.length % colors.length] });
+      renderSegmentsList();
+      drawWheel();
+    }
+
+    function deleteSegment(i) {
+      if (segments.length <= 2) { alert('Il faut au moins 2 segments.'); return; }
+      segments.splice(i, 1);
+      renderSegmentsList();
+      drawWheel();
+    }
+
+    async function saveSegments() {
+      await db.collection('players').doc(playerId).update({ wheelSegments: segments });
+      alert('✔ Roue sauvegardée pour ce joueur !');
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -416,25 +416,31 @@
 
         </div>
 
-        <!-- ROUE DES ATTRIBUTS -->
+        <!-- ROUE DU DESTIN -->
         <div class="wheel-section" id="wheel-section">
           <div class="wheel-top-bar">
             <div>
-              <div class="wheel-title">Roue des Attributs</div>
-              <div class="wheel-sub">Notes FM · Tirs, Passes, Vitesse, Technique…</div>
+              <div class="wheel-title">Roue du Destin</div>
+              <div class="wheel-sub">Fonctionnalité verrouillée · Admin uniquement</div>
             </div>
             <button class="btn-admin-wheel" onclick="adminOpenWheel()">⚙ Admin</button>
           </div>
           <div class="wheel-preview">
-            <svg id="radar-svg" viewBox="0 0 260 260" width="260" height="260" xmlns="http://www.w3.org/2000/svg">
-              ${buildRadarSVG(p.attributes || null, true)}
+            <svg viewBox="0 0 260 260" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="130" cy="130" r="100" fill="none" stroke="rgba(168,192,0,.1)" stroke-width="1"/>
+              <circle cx="130" cy="130" r="75"  fill="none" stroke="rgba(168,192,0,.08)" stroke-width="1"/>
+              <circle cx="130" cy="130" r="50"  fill="none" stroke="rgba(168,192,0,.06)" stroke-width="1"/>
+              <circle cx="130" cy="130" r="25"  fill="none" stroke="rgba(168,192,0,.04)" stroke-width="1"/>
+              <line x1="130" y1="30"  x2="130" y2="230" stroke="rgba(168,192,0,.08)" stroke-width="1"/>
+              <line x1="30"  y1="130" x2="230" y2="130" stroke="rgba(168,192,0,.08)" stroke-width="1"/>
+              <line x1="59"  y1="59"  x2="201" y2="201" stroke="rgba(168,192,0,.06)" stroke-width="1"/>
+              <line x1="201" y1="59"  x2="59"  y2="201" stroke="rgba(168,192,0,.06)" stroke-width="1"/>
+              <circle cx="130" cy="130" r="8" fill="rgba(168,192,0,.2)" stroke="rgba(168,192,0,.4)" stroke-width="1.5"/>
             </svg>
-            <div class="lock-overlay" id="lock-overlay"><div class="lock-icon">🔒</div></div>
+            <div class="lock-overlay"><div class="lock-icon">🔒</div></div>
           </div>
-          <div id="wheel-status">
-            <button class="btn-wheel" disabled><span class="lock">🔒</span> Fonctionnalité verrouillée</button>
-            <div><span class="coming-soon">Disponible prochainement</span></div>
-          </div>
+          <button class="btn-wheel" disabled><span class="lock">🔒</span> Verrouillée</button>
+          <div><span class="coming-soon">Disponible prochainement</span></div>
         </div>
 
         <!-- BLOCS DU BAS -->
@@ -469,126 +475,10 @@
       `;
     }
 
-    const ATTRS = [
-      { key: 'vitesse',    label: 'Vitesse'    },
-      { key: 'tirs',       label: 'Tirs'       },
-      { key: 'passes',     label: 'Passes'     },
-      { key: 'dribbles',   label: 'Dribbles'   },
-      { key: 'defense',    label: 'Défense'    },
-      { key: 'physique',   label: 'Physique'   },
-      { key: 'mental',     label: 'Mental'     },
-      { key: 'technique',  label: 'Technique'  },
-    ];
-    const CX = 130, CY = 130, R = 100;
-
-    function radarPoint(i, n, val, max) {
-      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
-      const r = (val / max) * R;
-      return { x: CX + r * Math.cos(angle), y: CY + r * Math.sin(angle) };
-    }
-
-    function buildRadarSVG(attrs, blurred) {
-      const n = ATTRS.length;
-      const max = 20;
-      let svg = '';
-
-      // grid circles
-      [0.25, 0.5, 0.75, 1].forEach(frac => {
-        svg += `<circle cx="${CX}" cy="${CY}" r="${R * frac}" fill="none" stroke="rgba(168,192,0,.1)" stroke-width="1"/>`;
-      });
-
-      // axes + labels
-      ATTRS.forEach((a, i) => {
-        const end = radarPoint(i, n, max, max);
-        svg += `<line x1="${CX}" y1="${CY}" x2="${end.x}" y2="${end.y}" stroke="rgba(168,192,0,.12)" stroke-width="1"/>`;
-        const lbl = radarPoint(i, n, max * 1.18, max);
-        svg += `<text x="${lbl.x}" y="${lbl.y}" text-anchor="middle" dominant-baseline="middle"
-          font-family="Barlow Condensed,sans-serif" font-size="10" fill="rgba(168,192,0,.5)"
-          letter-spacing="1">${a.label.toUpperCase()}</text>`;
-      });
-
-      // polygon
-      if (attrs) {
-        const pts = ATTRS.map((a, i) => {
-          const val = Math.min(max, Math.max(0, attrs[a.key] || 0));
-          const p = radarPoint(i, n, val, max);
-          return `${p.x},${p.y}`;
-        }).join(' ');
-        const filter = blurred ? 'filter="url(#blur)"' : '';
-        svg += `<defs><filter id="blur"><feGaussianBlur stdDeviation="3"/></filter></defs>`;
-        svg += `<polygon points="${pts}" fill="rgba(168,192,0,.25)" stroke="rgba(168,192,0,.7)" stroke-width="1.5" ${filter}/>`;
-        if (!blurred) {
-          ATTRS.forEach((a, i) => {
-            const val = Math.min(max, Math.max(0, attrs[a.key] || 0));
-            const p = radarPoint(i, n, val, max);
-            svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--green2)"/>`;
-          });
-        }
-      } else {
-        // placeholder blob
-        const pts = ATTRS.map((a, i) => {
-          const val = 8 + Math.sin(i * 1.3) * 4;
-          const p = radarPoint(i, n, val, max);
-          return `${p.x},${p.y}`;
-        }).join(' ');
-        svg += `<defs><filter id="blur"><feGaussianBlur stdDeviation="3"/></filter></defs>`;
-        svg += `<polygon points="${pts}" fill="rgba(168,192,0,.15)" stroke="rgba(168,192,0,.3)" stroke-width="1.5" filter="url(#blur)"/>`;
-      }
-      return svg;
-    }
-
     async function adminOpenWheel() {
       const pwd = prompt('Mot de passe admin :');
       if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
-
-      const doc = await db.collection('players').doc(id).get();
-      const cur = doc.data().attributes || {};
-
-      // Build modal
-      const modal = document.createElement('div');
-      modal.id = 'admin-modal';
-      modal.innerHTML = `
-        <div class="modal-overlay" onclick="closeModal()"></div>
-        <div class="modal-box">
-          <div class="modal-header">
-            <span class="modal-title">⚙ Attributs du joueur</span>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-          </div>
-          <div class="modal-subtitle">Valeurs FM de 1 à 20</div>
-          <div class="modal-grid">
-            ${ATTRS.map(a => `
-              <div class="modal-field">
-                <label>${a.label}</label>
-                <div class="attr-input-row">
-                  <input type="range" min="1" max="20" value="${cur[a.key] || 10}"
-                    id="attr-${a.key}" oninput="document.getElementById('val-${a.key}').textContent=this.value"/>
-                  <span class="attr-val" id="val-${a.key}">${cur[a.key] || 10}</span>
-                </div>
-              </div>`).join('')}
-          </div>
-          <div class="modal-footer">
-            <button class="modal-save" onclick="saveAttributes()">✔ Enregistrer</button>
-          </div>
-        </div>`;
-      document.body.appendChild(modal);
-    }
-
-    function closeModal() {
-      const m = document.getElementById('admin-modal');
-      if (m) m.remove();
-    }
-
-    async function saveAttributes() {
-      const attrs = {};
-      ATTRS.forEach(a => {
-        attrs[a.key] = parseInt(document.getElementById('attr-' + a.key).value);
-      });
-      await db.collection('players').doc(id).update({ attributes: attrs });
-
-      // Refresh radar
-      document.getElementById('radar-svg').innerHTML = buildRadarSVG(attrs, true);
-      closeModal();
-      alert('✔ Attributs sauvegardés !');
+      window.location.href = 'wheel.html?id=' + id;
     }
 
     async function adminEditRatings() {
