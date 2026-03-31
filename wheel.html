@@ -99,8 +99,19 @@
 
     @media (max-width: 480px) { .wheel-wrap { width: 280px; height: 280px; } nav { padding: 16px 20px; } .spin-opt label { width: 58px; height: 58px; font-size: 1.6rem; } }
 
-    .locked-box { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 40px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-    .locked-icon { font-size: 2.5rem; opacity: .5; }
+    /* AUTH */
+    .auth-box { width: 100%; max-width: 460px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 36px 32px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .auth-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: .08em; color: var(--green); }
+    .auth-sub { font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: center; }
+    .auth-fields { display: flex; align-items: center; gap: 16px; width: 100%; flex-wrap: wrap; justify-content: center; }
+    .auth-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
+    .auth-field label { font-family: 'Barlow Condensed', sans-serif; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .auth-field input { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .3em; text-align: center; padding: 12px 8px; outline: none; transition: border-color .2s; width: 100%; }
+    .auth-field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(168,192,0,.12); }
+    .auth-sep { font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .1em; color: var(--muted); padding-top: 18px; }
+    .auth-error { font-family: 'Barlow Condensed', sans-serif; font-size: .9rem; letter-spacing: .06em; color: #e74c3c; display: none; text-align: center; }
+
+    .locked-box { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 40px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }    .locked-icon { font-size: 2.5rem; opacity: .5; }
     .locked-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: .08em; color: var(--text); }
     .locked-sub { font-family: 'Barlow Condensed', sans-serif; font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
     .btn-unlock { margin-top: 8px; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 9px 20px; font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .2s; }
@@ -146,6 +157,61 @@
     const playerId = params.get('id');
     document.getElementById('back-link').href = 'player.html?id=' + playerId;
 
+    // Codes d'accès par joueur
+    const PLAYER_CODES = {
+      'C9jIpBfySPlgYWPd2bNu': '3847',
+      'CrTJ9JZzZATlMWxQSiFV': '6219',
+      'zbp0CwSWvPSq33K02QmL': '7531',
+      '84SXtIgWbIWHC78gSzhR': '4906',
+      'RZIxpbW9C74fCoZNr1p9': '2873',
+      'hvi7P2vkHNDddWJH7h1N': '5164',
+    };
+    const ADMIN_CODE = '0550';
+
+    function checkAccess() {
+      return new Promise(resolve => {
+        const playerCode = PLAYER_CODES[playerId];
+        document.getElementById('main').innerHTML = `
+          <div class="auth-box">
+            <div class="auth-title">🔐 Accès Roue du Destin</div>
+            <div class="auth-sub">Entre ton code personnel pour accéder à ta roue</div>
+            <div class="auth-fields">
+              <div class="auth-field">
+                <label>Ton code</label>
+                <input type="password" id="player-code" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+              </div>
+              <div class="auth-sep">ou</div>
+              <div class="auth-field">
+                <label>Code admin</label>
+                <input type="password" id="admin-code" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+              </div>
+            </div>
+            <div class="auth-error" id="auth-error"></div>
+            <button class="btn-confirm" onclick="submitAuth()">→ Accéder</button>
+          </div>`;
+
+        window.submitAuth = function() {
+          const pc = document.getElementById('player-code').value.trim();
+          const ac = document.getElementById('admin-code').value.trim();
+          const err = document.getElementById('auth-error');
+          if (ac === ADMIN_CODE) { resolve('admin'); return; }
+          if (playerCode && pc === playerCode) { resolve('player'); return; }
+          err.textContent = '❌ Code incorrect. Réessaie.';
+          err.style.display = 'block';
+          document.getElementById('player-code').value = '';
+          document.getElementById('admin-code').value = '';
+        };
+
+        // Entrée clavier
+        document.addEventListener('keydown', function handler(e) {
+          if (e.key === 'Enter') {
+            document.removeEventListener('keydown', handler);
+            window.submitAuth();
+          }
+        });
+      });
+    }
+
     // Segments de base (mélangés avant chaque tour)
     const ATTR_BASE = [
       ...Array(5).fill({ label:'+1', color:'#2d4a0a', val:1 }),
@@ -174,6 +240,8 @@
     let canvas, ctx, activeSegs=[];
 
     async function init() {
+      await checkAccess();
+
       const doc = await db.collection('players').doc(playerId).get();
       if (!doc.exists) { document.getElementById('main').innerHTML = '<p style="color:var(--muted);text-align:center;padding:60px">Joueur introuvable.</p>'; return; }
       const p = doc.data();
@@ -206,7 +274,7 @@
             <div class="banner-club">⚽ ${p.club}</div>
           </div>
         </div>
-        <div id="content"></div>`;
+        <div id="content" style="width:100%;display:flex;flex-direction:column;gap:20px"></div>`;
     }
 
     function renderLocked(savedResults) {
