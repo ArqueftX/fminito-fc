@@ -321,18 +321,6 @@
 
     function renderSelectPhase(unlockDate) {
       document.getElementById('content').innerHTML = `
-        <div class="date-banner">
-          <div class="date-banner-text">
-            <span class="date-banner-icon">🚫</span>
-            <div class="date-banner-msg">
-              Les roues du destin pourront être lancées le
-              <span id="unlock-date-txt">${unlockDate}</span>
-              sauf changement de date.
-            </div>
-          </div>
-          <button class="btn-change-date" onclick="changeUnlockDate()">⚙ Changer la date</button>
-        </div>
-
         <div id="phase-select" style="width:100%;display:flex;flex-direction:column;gap:20px">
           <div class="s-card">
             <div class="s-title">Choix des tours</div>
@@ -373,7 +361,7 @@
               </div>
             </div>
           </div>
-          <button class="btn-confirm" disabled style="opacity:.4;cursor:not-allowed;transform:none;box-shadow:none">🔒 Disponible le <span id="btn-date">${unlockDate}</span></button>
+          <button class="btn-confirm" onclick="startSpins()">🎰 Confirmer et lancer</button>
         </div>
         <div id="phase-spin" style="width:100%;display:none;flex-direction:column;align-items:center;gap:20px">
           <div class="turn-bar">
