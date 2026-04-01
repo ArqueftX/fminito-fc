@@ -210,7 +210,10 @@
       transition: transform .2s, border-color .2s, box-shadow .2s;
       cursor: pointer;
       animation: fadeUp .4s ease both;
+      display: flex;
+      flex-direction: column;
     }
+    .player-card .card-actions { margin-top: auto; padding-top: 12px; }
     .player-card:hover {
       transform: translateY(-4px);
       border-color: var(--green);
