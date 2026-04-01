@@ -352,6 +352,25 @@
       background: rgba(192,57,43,.08);
     }
 
+    .wheel-status {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .78rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: 5px 10px; border-radius: 4px;
+      margin-top: 2px;
+      text-align: center;
+    }
+    .wheel-status.done {
+      background: rgba(168,192,0,.08);
+      color: var(--green);
+      border: 1px solid rgba(168,192,0,.2);
+    }
+    .wheel-status.pending {
+      background: rgba(232,160,0,.06);
+      color: #e8a000;
+      border: 1px solid rgba(232,160,0,.2);
+    }
+
     /* ── FOOTER ── */
     footer {
       position: relative;
@@ -462,6 +481,9 @@
                 <span class="stat-label">Pied préféré</span>
                 <span class="stat-value">${footIcon(p.foot)}</span>
               </div>
+            </div>
+            <div class="wheel-status ${p.wheelLocked ? 'done' : 'pending'}">
+              ${p.wheelLocked ? '✔ Roue tournée' : '⏳ Roue en attente'}
             </div>
             <div class="card-actions" onclick="event.stopPropagation()">
               <a href="edit.html?id=${p.id}" class="card-edit">✏ Modifier</a>
