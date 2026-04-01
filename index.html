@@ -121,7 +121,7 @@
     main {
       position: relative;
       z-index: 1;
-      max-width: 1100px;
+      max-width: 1300px;
       margin: 0 auto;
       padding: 0 20px 80px;
     }
@@ -389,6 +389,64 @@
       font-size: .85rem;
       letter-spacing: .1em;
     }
+
+    /* ── PAGE LAYOUT ── */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .page-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── RANKING PANEL ── */
+    .ranking-panel {
+      position: sticky;
+      top: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .ranking-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem; letter-spacing: .15em;
+      color: var(--green); padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ranking-section { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .ranking-section:last-child { border-bottom: none; }
+    .ranking-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .7rem; font-weight: 700; letter-spacing: .15em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 0 16px 8px;
+    }
+    .rank-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 16px; transition: background .15s; cursor: pointer;
+    }
+    .rank-row:hover { background: rgba(168,192,0,.04); }
+    .rank-pos {
+      font-family: 'Bebas Neue', sans-serif; font-size: .9rem;
+      color: var(--muted); min-width: 18px; text-align: center;
+    }
+    .rank-pos.gold   { color: #f1c40f; }
+    .rank-pos.silver { color: #bdc3c7; }
+    .rank-pos.bronze { color: #cd7f32; }
+    .rank-name {
+      font-family: 'Barlow Condensed', sans-serif; font-size: .88rem;
+      font-weight: 600; letter-spacing: .04em; color: var(--text); flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rank-val {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
+      color: var(--green2);
+    }
+    .rank-val.pot { color: #60aaff; }
   </style>
 </head>
 <body>
@@ -402,15 +460,34 @@
   <div class="divider"><span>⬦ Effectif ⬦</span></div>
 
   <main>
-    <div class="section-header">
-      <h2 class="section-title">Joueurs</h2>
-      <a href="create.html" class="btn-add">
-        <span class="plus">+</span>
-        Créer un joueur
-      </a>
-    </div>
+    <div class="page-layout">
+      <!-- CLASSEMENT -->
+      <aside class="ranking-panel">
+        <div class="ranking-title">🏆 Classement</div>
 
-    <div id="roster"></div>
+        <div class="ranking-section">
+          <div class="ranking-label">Niveau général</div>
+          <div id="rank-overall"></div>
+        </div>
+
+        <div class="ranking-section">
+          <div class="ranking-label">Potentiel</div>
+          <div id="rank-potential"></div>
+        </div>
+      </aside>
+
+      <!-- EFFECTIF -->
+      <div class="roster-col">
+        <div class="section-header">
+          <h2 class="section-title">Joueurs</h2>
+          <a href="create.html" class="btn-add">
+            <span class="plus">+</span>
+            Créer un joueur
+          </a>
+        </div>
+        <div id="roster"></div>
+      </div>
+    </div>
   </main>
 
   <footer>FMinito FC · FM26 · créée avec pa$$ion, ah bah non</footer>
@@ -500,11 +577,32 @@
       }</div>`;
     }
 
+    function renderRanking(players) {
+      const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+
+      const byOverall = [...players].sort((a,b) => (b.overall??100) - (a.overall??100));
+      document.getElementById('rank-overall').innerHTML = byOverall.map((p, i) => `
+        <div class="rank-row" onclick="window.location.href='player.html?id=${p.id}'">
+          <span class="rank-pos ${medal(i)}">${i+1}</span>
+          <span class="rank-name">${p.firstName} ${p.lastName}</span>
+          <span class="rank-val">${p.overall ?? 100}</span>
+        </div>`).join('');
+
+      const byPotential = [...players].sort((a,b) => (b.potential??110) - (a.potential??110));
+      document.getElementById('rank-potential').innerHTML = byPotential.map((p, i) => `
+        <div class="rank-row" onclick="window.location.href='player.html?id=${p.id}'">
+          <span class="rank-pos ${medal(i)}">${i+1}</span>
+          <span class="rank-name">${p.firstName} ${p.lastName}</span>
+          <span class="rank-val pot">${p.potential ?? 110}</span>
+        </div>`).join('');
+    }
+
     // Écoute en temps réel — se met à jour automatiquement pour tout le monde
     document.getElementById('roster').innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px">Chargement…</p>`;
     db.collection('players').orderBy('createdAt').onSnapshot(snapshot => {
       const players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       render(players);
+      renderRanking(players);
     });
   </script>
 </body>
