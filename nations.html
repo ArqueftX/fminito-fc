@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nations & Divisions · FMinito FC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:  #a8c000;
+      --green2: #c8e800;
+      --dark:   #0a0c06;
+      --card:   #181d0e;
+      --border: #2a3010;
+      --text:   #e8edcc;
+      --muted:  #7a8555;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--dark); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        repeating-linear-gradient(180deg, transparent 0px, transparent 58px, rgba(168,192,0,.04) 58px, rgba(168,192,0,.04) 60px),
+        repeating-linear-gradient(90deg, transparent 0px, transparent 118px, rgba(168,192,0,.03) 118px, rgba(168,192,0,.03) 120px);
+      pointer-events: none; z-index: 0;
+    }
+
+    nav {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+    }
+    .back-btn { display: flex; align-items: center; gap: 8px; color: var(--muted); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; transition: color .2s; }
+    .back-btn:hover { color: var(--green); }
+    .nav-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .1em; color: var(--green); margin-left: auto; }
+
+    main {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .page-header { margin-bottom: 36px; }
+    .page-header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.2rem, 6vw, 3.5rem);
+      letter-spacing: .06em; line-height: 1;
+      background: linear-gradient(135deg, var(--green2), var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 8px;
+    }
+    .page-header p { color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: .95rem; letter-spacing: .1em; text-transform: uppercase; }
+
+    .intro-box {
+      background: rgba(168,192,0,.05); border: 1px solid rgba(168,192,0,.15);
+      border-radius: 8px; padding: 18px 22px; margin-bottom: 32px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: .95rem;
+      letter-spacing: .04em; color: var(--text); line-height: 1.6;
+    }
+    .intro-box b { color: var(--green2); }
+
+    .nations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 16px;
+    }
+
+    .nation-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .nation-card:hover { border-color: var(--green); box-shadow: 0 6px 24px rgba(168,192,0,.1); }
+
+    .nation-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      background: rgba(168,192,0,.03);
+    }
+    .nation-flag { font-size: 1.6rem; line-height: 1; }
+    .nation-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: .08em; color: var(--text); }
+
+    .nation-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+
+    .division-row {
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .div-icon { font-size: .9rem; margin-top: 2px; flex-shrink: 0; }
+    .div-info { flex: 1; }
+    .div-label {
+      font-family: 'Barlow Condensed', sans-serif; font-size: .7rem;
+      font-weight: 700; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 2px;
+    }
+    .div-name {
+      font-family: 'Barlow Condensed', sans-serif; font-size: .95rem;
+      font-weight: 600; letter-spacing: .04em; color: var(--text);
+    }
+    .div-note {
+      font-family: 'Barlow', sans-serif; font-size: .78rem;
+      color: var(--muted); margin-top: 2px;
+    }
+
+    .tag-min {
+      display: inline-block; padding: 2px 8px; border-radius: 3px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: .72rem;
+      font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      background: rgba(168,192,0,.1); color: var(--green); border: 1px solid rgba(168,192,0,.2);
+    }
+
+    .section-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 32px 0 20px;
+    }
+    .section-divider span {
+      font-family: 'Bebas Neue', sans-serif; font-size: .9rem;
+      letter-spacing: .2em; color: var(--muted);
+    }
+    .section-divider::before, .section-divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    @media (max-width: 500px) {
+      .nations-grid { grid-template-columns: 1fr; }
+      nav { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="back-btn">← Accueil</a>
+    <span class="nav-title">FMinito FC</span>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Nations & Divisions</h1>
+      <p>Choisis ton club de départ</p>
+    </div>
+
+    <div class="intro-box">
+      Tu peux choisir <b>n'importe quel club</b> dans les nations et divisions ci-dessous.
+      Chaque pays affiche la <b>division minimale</b> disponible dans la partie — tu peux donc viser un club de cette division ou d'une division supérieure.
+    </div>
+
+    <div class="nations-grid">
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+          <span class="nation-name">Angleterre</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">National League North / South</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">6e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇩🇪</span>
+          <span class="nation-name">Allemagne</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">3. Liga</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">3e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇦🇷</span>
+          <span class="nation-name">Argentine</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Primera Nacional</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">2e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇪🇸</span>
+          <span class="nation-name">Espagne</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Segunda Federación</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">4e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇫🇷</span>
+          <span class="nation-name">France</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Championnat National 2</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">4e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇮🇹</span>
+          <span class="nation-name">Italie</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Serie C Sky Wifi</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">3e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇳🇴</span>
+          <span class="nation-name">Norvège</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Norsk Tipping-ligaen</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">1re div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇺🇿</span>
+          <span class="nation-name">Ouzbékistan</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">O'zbekiston Ikkinchi Ligasi</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">2e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇳🇱</span>
+          <span class="nation-name">Pays-Bas</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Keuken Kampioen Divisie</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">2e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇵🇷</span>
+          <span class="nation-name">Porto Rico</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Puerto Rico Soccer League Third Division</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">3e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nation-card">
+        <div class="nation-header">
+          <span class="nation-flag">🇹🇷</span>
+          <span class="nation-name">Turquie</span>
+        </div>
+        <div class="nation-body">
+          <div class="division-row">
+            <span class="div-icon">📊</span>
+            <div class="div-info">
+              <div class="div-label">Division minimale disponible</div>
+              <div class="div-name">Nesine 2. Lig</div>
+              <div class="div-note">et toutes les divisions au-dessus <span class="tag-min">2e div.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</body>
+</html>
