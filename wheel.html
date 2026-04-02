@@ -477,14 +477,28 @@
         prepAndDraw(); // nouveau mélange pour le prochain tour
         document.getElementById('btn-spin').disabled=false;
       } else {
-        // Tout terminé → verrouiller dans Firebase
+        // Calcule le gain de potentiel total
+        const potGain = results.filter(r=>r.type==='p').reduce((sum,r)=>sum+r.val, 0);
+
+        // Récupère le potentiel actuel et met à jour
+        const playerDoc = await db.collection('players').doc(playerId).get();
+        const currentPotential = playerDoc.data().potential ?? 110;
         await db.collection('players').doc(playerId).update({
           wheelLocked: true,
-          wheelResults: results
+          wheelResults: results,
+          potential: currentPotential + potGain
         });
+
         const btn=document.getElementById('btn-spin');
         btn.textContent='🔒 Tous les tours ont été effectués';
         btn.disabled=true;
+
+        if (potGain > 0) {
+          const info = document.createElement('div');
+          info.style.cssText = 'margin-top:12px;background:rgba(96,170,255,.1);border:1px solid rgba(96,170,255,.25);border-radius:6px;padding:12px 20px;text-align:center;font-family:"Bebas Neue",sans-serif;font-size:1.2rem;color:#60aaff;letter-spacing:.06em;';
+          info.textContent = `📈 Potentiel mis à jour automatiquement : +${potGain} → ${currentPotential + potGain}`;
+          btn.parentNode.insertBefore(info, btn.nextSibling);
+        }
       }
     }
 
