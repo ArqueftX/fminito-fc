@@ -255,10 +255,21 @@
         if (cfg.exists && cfg.data().unlockDate) unlockDate = cfg.data().unlockDate;
       } catch(e) {}
 
-      // Vérifie si les tours sont déjà faits
+      // Vérifie si les tours sont déjà finis
       if (p.wheelLocked) {
         renderBanner(p);
         renderLocked(p.wheelResults || []);
+        return;
+      }
+
+      // Vérifie s'il y a une session en cours (tours partiellement faits)
+      if (p.wheelSession && p.wheelSession.spinQueue && p.wheelSession.currentSpin > 0) {
+        spinQueue   = p.wheelSession.spinQueue;
+        currentSpin = p.wheelSession.currentSpin;
+        results     = p.wheelSession.results || [];
+        renderBanner(p);
+        renderSelectPhase(unlockDate);
+        showSpinPhase();
         return;
       }
 
@@ -306,7 +317,7 @@
     async function adminUnlock() {
       const pwd = prompt('Mot de passe admin :');
       if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
-      await db.collection('players').doc(playerId).update({ wheelLocked: false, wheelResults: [] });
+      await db.collection('players').doc(playerId).update({ wheelLocked: false, wheelResults: [], wheelSession: null });
       location.reload();
     }
 
@@ -393,13 +404,25 @@
       const a = parseInt(document.querySelector('input[name="as"]:checked').value);
       spinQueue   = [...Array(a).fill('a'), ...Array(5-a).fill('p')];
       currentSpin = 0; results = []; currentAngle = 0;
-      document.getElementById('phase-select').style.display = 'none';
+
+      // Sauvegarde la file de tours dès le départ
+      db.collection('players').doc(playerId).update({
+        wheelSession: { spinQueue, currentSpin, results }
+      });
+
+      showSpinPhase();
+    }
+
+    function showSpinPhase() {
+      document.getElementById('phase-select') && (document.getElementById('phase-select').style.display = 'none');
       const ps = document.getElementById('phase-spin');
       ps.style.display = 'flex';
       canvas = document.getElementById('wheelCanvas');
       ctx    = canvas.getContext('2d');
+      renderLog();
       updateTurnUI();
       prepAndDraw();
+      document.getElementById('btn-spin').disabled = false;
     }
 
     function prepAndDraw() {
@@ -473,8 +496,12 @@
       renderLog();
 
       if(currentSpin<spinQueue.length){
+        // Sauvegarde la progression
+        await db.collection('players').doc(playerId).update({
+          wheelSession: { spinQueue, currentSpin, results }
+        });
         updateTurnUI();
-        prepAndDraw(); // nouveau mélange pour le prochain tour
+        prepAndDraw();
         document.getElementById('btn-spin').disabled=false;
       } else {
         // Calcule le gain de potentiel total
@@ -486,6 +513,7 @@
         await db.collection('players').doc(playerId).update({
           wheelLocked: true,
           wheelResults: results,
+          wheelSession: null,
           potential: currentPotential + potGain
         });
 
