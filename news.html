@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Récap des News · FMinito FC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:#a8c000; --green2:#c8e800; --dark:#0a0c06; --card:#181d0e;
+      --border:#2a3010; --text:#e8edcc; --muted:#7a8555;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--dark);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(180deg,transparent 0px,transparent 58px,rgba(168,192,0,.04) 58px,rgba(168,192,0,.04) 60px),repeating-linear-gradient(90deg,transparent 0px,transparent 118px,rgba(168,192,0,.03) 118px,rgba(168,192,0,.03) 120px);pointer-events:none;z-index:0;}
+    nav{position:relative;z-index:1;display:flex;align-items:center;gap:16px;padding:20px 40px;border-bottom:1px solid var(--border);}
+    .back-btn{display:flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;letter-spacing:.08em;text-transform:uppercase;transition:color .2s;}
+    .back-btn:hover{color:var(--green);}
+    .nav-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:var(--green);margin-left:auto;}
+    main{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:40px 24px 80px;}
+
+    .player-banner{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;display:flex;align-items:center;gap:16px;margin-bottom:24px;}
+    .banner-pos{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--green);background:rgba(168,192,0,.08);border:1px solid rgba(168,192,0,.2);border-radius:6px;padding:4px 14px;line-height:1.3;}
+    .banner-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.05em;}
+    .banner-name span{color:var(--green);}
+    .banner-club{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+
+    .info-msg{background:rgba(168,192,0,.05);border:1px solid rgba(168,192,0,.15);border-radius:8px;padding:14px 18px;margin-bottom:24px;font-family:'Barlow Condensed',sans-serif;font-size:.88rem;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:10px;}
+    .info-msg span{font-size:1.1rem;}
+
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .section-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.1em;color:var(--green);}
+
+    .btn-admin{display:flex;align-items:center;gap:8px;background:rgba(168,192,0,.08);border:1px solid rgba(168,192,0,.25);color:var(--green);border-radius:5px;padding:9px 18px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+    .btn-admin:hover{background:rgba(168,192,0,.16);border-color:var(--green);}
+
+    .empty-state{text-align:center;padding:60px 20px;border:1px dashed var(--border);border-radius:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:1rem;letter-spacing:.06em;}
+    .empty-state .icon{font-size:2.5rem;margin-bottom:12px;opacity:.4;}
+
+    .news-grid{display:flex;flex-direction:column;gap:16px;}
+
+    .news-card{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;animation:fadeUp .3s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .news-img{width:100%;max-height:400px;object-fit:contain;background:#0d1208;display:block;}
+    .news-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;}
+    .news-date{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+    .news-del{background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:4px 10px;font-size:.75rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;transition:all .2s;}
+    .news-del:hover{border-color:#c0392b;color:#c0392b;}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;}
+    .modal-box{background:#1a2008;border:1px solid var(--border);border-radius:12px;width:min(480px,95vw);padding:28px;display:flex;flex-direction:column;gap:18px;}
+    .modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.08em;color:var(--green);}
+    .modal-field{display:flex;flex-direction:column;gap:6px;}
+    .modal-field label{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+    .modal-field input{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.95rem;padding:10px 12px;outline:none;transition:border-color .2s;width:100%;}
+    .modal-field input:focus{border-color:var(--green);}
+    .drop-zone{border:2px dashed var(--border);border-radius:8px;padding:32px;text-align:center;cursor:pointer;transition:border-color .2s;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:.06em;color:var(--muted);}
+    .drop-zone:hover,.drop-zone.over{border-color:var(--green);color:var(--green);}
+    .drop-zone input{display:none;}
+    .preview-thumb{width:100%;max-height:200px;object-fit:contain;border-radius:6px;margin-top:8px;display:none;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+    .btn-cancel:hover{border-color:var(--muted);}
+    .btn-save{background:var(--green);color:var(--dark);border:none;border-radius:5px;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+    .btn-save:hover{background:var(--green2);}
+    .btn-save:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+  </style>
+</head>
+<body>
+  <nav>
+    <a id="back-link" href="index.html" class="back-btn">← Fiche joueur</a>
+    <span class="nav-title">FMinito FC</span>
+  </nav>
+  <main id="main"><p style="color:var(--muted);text-align:center;padding:60px">Chargement…</p></main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey:"AIzaSyA8Gx0rGa49jQQPUaMD8SSB0Duvh7b5Gkk",
+      authDomain:"fminito-fc.firebaseapp.com",
+      projectId:"fminito-fc",
+      storageBucket:"fminito-fc.firebasestorage.app",
+      messagingSenderId:"607684709890",
+      appId:"1:607684709890:web:9958dc52fe7d4c7bb0611b"
+    });
+    const db = firebase.firestore();
+    const IMGBB_KEY = 'd9372a9040baab6d487c26b11f4caba5';
+
+    const params = new URLSearchParams(window.location.search);
+    const playerId = params.get('id');
+    document.getElementById('back-link').href = 'player.html?id=' + playerId;
+
+    let playerData = null;
+
+    async function init() {
+      const doc = await db.collection('players').doc(playerId).get();
+      if (!doc.exists) { document.getElementById('main').innerHTML='<p style="color:var(--muted);text-align:center;padding:60px">Joueur introuvable.</p>'; return; }
+      playerData = doc.data();
+      render();
+    }
+
+    async function render() {
+      const snap = await db.collection('players').doc(playerId).collection('news').orderBy('date','desc').get();
+      const articles = snap.docs.map(d => ({id:d.id,...d.data()}));
+
+      document.getElementById('main').innerHTML = `
+        <div class="player-banner">
+          <div class="banner-pos">${playerData.position||'?'}</div>
+          <div>
+            <div class="banner-name">${playerData.firstName} <span>${playerData.lastName.toUpperCase()}</span></div>
+            <div class="banner-club">⚽ ${playerData.club}</div>
+          </div>
+        </div>
+
+        <div class="info-msg">
+          <span>📢</span>
+          Les actualités sont publiées directement dans le salon Discord sans délai — retrouve-les ici à tout moment.
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">📰 Actualités</div>
+          <button class="btn-admin" onclick="openUpload()">⬆ Uploader (admin)</button>
+        </div>
+
+        ${articles.length === 0 ? `
+          <div class="empty-state">
+            <div class="icon">📰</div>
+            <p>Aucune actualité pour ce joueur pour l'instant.</p>
+          </div>` : `
+          <div class="news-grid">
+            ${articles.map(a => `
+              <div class="news-card">
+                <img class="news-img" src="${a.imageUrl}" alt="Actualité"/>
+                <div class="news-footer">
+                  <span class="news-date">📅 ${a.date}</span>
+                  <button class="news-del" onclick="deleteNews('${a.id}')">✕ Supprimer</button>
+                </div>
+              </div>`).join('')}
+          </div>`}
+      `;
+    }
+
+    function openUpload() {
+      const pwd = prompt('Mot de passe admin :');
+      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = 'upload-modal';
+      modal.innerHTML = `
+        <div class="modal-box">
+          <div class="modal-title">⬆ Nouvelle actualité</div>
+          <div class="modal-field">
+            <label>Date</label>
+            <input type="text" id="news-date" placeholder="Ex : 05/04/2026"/>
+          </div>
+          <div class="modal-field">
+            <label>Image (screen)</label>
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+              ondragover="event.preventDefault();this.classList.add('over')"
+              ondragleave="this.classList.remove('over')"
+              ondrop="handleDrop(event)">
+              📎 Clique ou glisse une image ici
+              <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])"/>
+            </div>
+            <img id="preview-thumb" class="preview-thumb"/>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+            <button class="btn-save" id="btn-upload" onclick="uploadNews()" disabled>⬆ Publier</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+
+    let selectedFile = null;
+
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.remove('over');
+      handleFile(e.dataTransfer.files[0]);
+    }
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const thumb = document.getElementById('preview-thumb');
+        thumb.src = e.target.result;
+        thumb.style.display = 'block';
+        document.getElementById('drop-zone').innerHTML = '✔ Image sélectionnée<br><small style="opacity:.6">' + file.name + '</small>';
+        document.getElementById('btn-upload').disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function uploadNews() {
+      const date = document.getElementById('news-date').value.trim();
+      if (!date) { alert('Entre une date.'); return; }
+      if (!selectedFile) { alert('Sélectionne une image.'); return; }
+
+      const btn = document.getElementById('btn-upload');
+      btn.disabled = true; btn.textContent = 'Envoi…';
+
+      try {
+        // Upload vers ImgBB
+        const formData = new FormData();
+        formData.append('image', selectedFile);
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+          method: 'POST', body: formData
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error('Erreur ImgBB');
+        const imageUrl = json.data.url;
+        const deleteUrl = json.data.delete_url;
+
+        await db.collection('players').doc(playerId).collection('news').add({
+          date, imageUrl, deleteUrl, createdAt: new Date().toISOString()
+        });
+
+        closeModal();
+        render();
+      } catch(e) {
+        btn.disabled = false; btn.textContent = '⬆ Publier';
+        alert('Erreur lors de l\'upload : ' + e.message);
+      }
+    }
+
+    async function deleteNews(newsId) {
+      const pwd = prompt('Mot de passe admin :');
+      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+      if (!confirm('Supprimer cette actualité ?')) return;
+      await db.collection('players').doc(playerId).collection('news').doc(newsId).delete();
+      render();
+    }
+
+    function closeModal() {
+      const m = document.getElementById('upload-modal');
+      if (m) m.remove();
+      selectedFile = null;
+    }
+
+    init();
+  </script>
+</body>
+</html>

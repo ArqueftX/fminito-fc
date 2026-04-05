@@ -459,32 +459,20 @@
 
         <!-- BLOCS DU BAS -->
         <div class="bottom-grid">
-          <div class="bottom-block">
+          <a href="news.html?id=${p.id}" class="bottom-block" style="text-decoration:none;cursor:pointer;">
             <div class="bottom-block-header">
               <span class="bottom-icon">📰</span>
               <div><div class="bottom-title">Récap des News</div><div class="bottom-sub">Toutes les actus Discord sur ce joueur</div></div>
-              <span class="bottom-lock">🔒</span>
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--green);opacity:.5;margin-left:auto;">→</span>
             </div>
-            <div class="bottom-preview">
-              <div class="preview-line"></div><div class="preview-line short"></div>
-              <div class="preview-line"></div><div class="preview-line shorter"></div><div class="preview-line"></div>
-            </div>
-            <div class="bottom-cta"><button class="btn-bottom" disabled>🔒 Voir les news</button></div>
-          </div>
-          <div class="bottom-block">
+          </a>
+          <a href="stats.html?id=${p.id}" class="bottom-block" style="text-decoration:none;cursor:pointer;">
             <div class="bottom-block-header">
               <span class="bottom-icon">📊</span>
               <div><div class="bottom-title">Performances</div><div class="bottom-sub">Buts, passes déc., matchs joués…</div></div>
-              <span class="bottom-lock">🔒</span>
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--green);opacity:.5;margin-left:auto;">→</span>
             </div>
-            <div class="bottom-preview">
-              <div class="perf-row"><span class="perf-label">Matchs</span><span class="perf-val perf-blur">—</span></div>
-              <div class="perf-row"><span class="perf-label">Buts</span><span class="perf-val perf-blur">—</span></div>
-              <div class="perf-row"><span class="perf-label">Passes déc.</span><span class="perf-val perf-blur">—</span></div>
-              <div class="perf-row"><span class="perf-label">Note moy.</span><span class="perf-val perf-blur">—</span></div>
-            </div>
-            <div class="bottom-cta"><button class="btn-bottom" disabled>🔒 Voir les performances</button></div>
-          </div>
+          </a>
         </div>
       `;
     }
