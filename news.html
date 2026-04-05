@@ -42,7 +42,10 @@
     .news-card{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;animation:fadeUp .3s ease both;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-    .news-img{width:100%;max-height:400px;object-fit:contain;background:#0d1208;display:block;}
+    .news-imgs-grid { display:grid; gap:2px; background:#0d1208; }
+    .news-img-wrap { position:relative; }
+    .news-img-label { position:absolute; top:8px; left:8px; background:rgba(0,0,0,.65); color:var(--green2); font-family:'Barlow Condensed',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:3px; z-index:1; }
+    .news-img { width:100%; max-height:320px; object-fit:contain; background:#0d1208; display:block; }
     .news-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;}
     .news-date{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
     .news-del{background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:4px 10px;font-size:.75rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;transition:all .2s;}
@@ -131,102 +134,120 @@
             <p>Aucune actualité pour ce joueur pour l'instant.</p>
           </div>` : `
           <div class="news-grid">
-            ${articles.map(a => `
+            ${articles.map(a => {
+              const imgs = a.images || (a.imageUrl ? [{url: a.imageUrl, label: 'Actualité'}] : []);
+              return `
               <div class="news-card">
-                <img class="news-img" src="${a.imageUrl}" alt="Actualité"/>
+                <div class="news-imgs-grid" style="grid-template-columns:repeat(${Math.min(imgs.length,2)},1fr)">
+                  ${imgs.map(img => `
+                    <div class="news-img-wrap">
+                      <div class="news-img-label">${img.label}</div>
+                      <img class="news-img" src="${img.url}" alt="${img.label}"/>
+                    </div>`).join('')}
+                </div>
                 <div class="news-footer">
                   <span class="news-date">📅 ${a.date}</span>
                   <button class="news-del" onclick="deleteNews('${a.id}')">✕ Supprimer</button>
                 </div>
-              </div>`).join('')}
+              </div>`;
+            }).join('')}
           </div>`}
       `;
     }
 
+    const SLOTS = [
+      { key: 'actu',   label: 'Actualité & Commentaires', required: true  },
+      { key: 'detail', label: 'Actualité en détail',       required: true  },
+      { key: 'card',   label: 'Fiche du joueur',            required: false },
+    ];
+
+    let selectedFiles = {};
+
     function openUpload() {
       const pwd = prompt('Mot de passe admin :');
       if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+      selectedFiles = {};
 
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
       modal.id = 'upload-modal';
       modal.innerHTML = `
-        <div class="modal-box">
+        <div class="modal-box" style="max-width:560px">
           <div class="modal-title">⬆ Nouvelle actualité</div>
           <div class="modal-field">
-            <label>Date</label>
+            <label>Date <span style="color:var(--green)">*</span></label>
             <input type="text" id="news-date" placeholder="Ex : 05/04/2026"/>
           </div>
-          <div class="modal-field">
-            <label>Image (screen)</label>
-            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
-              ondragover="event.preventDefault();this.classList.add('over')"
-              ondragleave="this.classList.remove('over')"
-              ondrop="handleDrop(event)">
-              📎 Clique ou glisse une image ici
-              <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])"/>
-            </div>
-            <img id="preview-thumb" class="preview-thumb"/>
-          </div>
+          ${SLOTS.map(slot => `
+            <div class="modal-field">
+              <label>${slot.label} ${slot.required ? '<span style="color:var(--green)">*</span>' : '<span style="color:var(--muted);font-size:.7rem">(facultatif)</span>'}</label>
+              <div class="drop-zone" id="dz-${slot.key}"
+                onclick="document.getElementById('fi-${slot.key}').click()"
+                ondragover="event.preventDefault();this.classList.add('over')"
+                ondragleave="this.classList.remove('over')"
+                ondrop="handleDropSlot(event,'${slot.key}')">
+                📎 Clique ou glisse une image
+                <input type="file" id="fi-${slot.key}" accept="image/*" onchange="handleFileSlot(this.files[0],'${slot.key}')"/>
+              </div>
+            </div>`).join('')}
           <div class="modal-actions">
             <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-            <button class="btn-save" id="btn-upload" onclick="uploadNews()" disabled>⬆ Publier</button>
+            <button class="btn-save" id="btn-upload" onclick="uploadNews()">⬆ Publier</button>
           </div>
         </div>`;
       document.body.appendChild(modal);
     }
 
-    let selectedFile = null;
-
-    function handleDrop(e) {
+    function handleDropSlot(e, key) {
       e.preventDefault();
-      document.getElementById('drop-zone').classList.remove('over');
-      handleFile(e.dataTransfer.files[0]);
+      document.getElementById('dz-' + key).classList.remove('over');
+      handleFileSlot(e.dataTransfer.files[0], key);
     }
 
-    function handleFile(file) {
+    function handleFileSlot(file, key) {
       if (!file || !file.type.startsWith('image/')) return;
-      selectedFile = file;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const thumb = document.getElementById('preview-thumb');
-        thumb.src = e.target.result;
-        thumb.style.display = 'block';
-        document.getElementById('drop-zone').innerHTML = '✔ Image sélectionnée<br><small style="opacity:.6">' + file.name + '</small>';
-        document.getElementById('btn-upload').disabled = false;
-      };
-      reader.readAsDataURL(file);
+      selectedFiles[key] = file;
+      document.getElementById('dz-' + key).innerHTML =
+        '✔ ' + file.name + '<input type="file" id="fi-' + key + '" accept="image/*" onchange="handleFileSlot(this.files[0],\'' + key + '\')" style="display:none"/>';
+    }
+
+    async function imgbbUpload(file) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_KEY, { method:'POST', body:formData });
+      const json = await res.json();
+      if (!json.success) throw new Error('Erreur ImgBB');
+      return json.data.url;
     }
 
     async function uploadNews() {
       const date = document.getElementById('news-date').value.trim();
       if (!date) { alert('Entre une date.'); return; }
-      if (!selectedFile) { alert('Sélectionne une image.'); return; }
+      if (!selectedFiles['actu'])   { alert('L\'image "Actualité & Commentaires" est obligatoire.'); return; }
+      if (!selectedFiles['detail']) { alert('L\'image "Actualité en détail" est obligatoire.'); return; }
 
       const btn = document.getElementById('btn-upload');
       btn.disabled = true; btn.textContent = 'Envoi…';
 
       try {
-        // Upload vers ImgBB
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-          method: 'POST', body: formData
-        });
-        const json = await res.json();
-        if (!json.success) throw new Error('Erreur ImgBB');
-        const imageUrl = json.data.url;
-        const deleteUrl = json.data.delete_url;
+        const images = [];
+        for (const slot of SLOTS) {
+          if (selectedFiles[slot.key]) {
+            btn.textContent = 'Upload ' + slot.label + '…';
+            const url = await imgbbUpload(selectedFiles[slot.key]);
+            images.push({ key: slot.key, label: slot.label, url });
+          }
+        }
 
         await db.collection('players').doc(playerId).collection('news').add({
-          date, imageUrl, deleteUrl, createdAt: new Date().toISOString()
+          date, images, createdAt: new Date().toISOString()
         });
 
         closeModal();
         render();
       } catch(e) {
         btn.disabled = false; btn.textContent = '⬆ Publier';
-        alert('Erreur lors de l\'upload : ' + e.message);
+        alert('Erreur : ' + e.message);
       }
     }
 
@@ -241,7 +262,7 @@
     function closeModal() {
       const m = document.getElementById('upload-modal');
       if (m) m.remove();
-      selectedFile = null;
+      selectedFiles = {};
     }
 
     init();
