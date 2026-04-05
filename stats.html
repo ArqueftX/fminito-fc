@@ -68,6 +68,7 @@
   </nav>
   <main id="main"><p style="color:var(--muted);text-align:center;padding:60px">Chargement…</p></main>
 
+  <script src="admin.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
@@ -173,8 +174,7 @@
     }
 
     function editSeason(seasonId) {
-      const pwd = prompt('Mot de passe admin :');
-      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+      if (!checkAdmin()) return;
 
       const s = seasons.find(x => x.id === seasonId);
       const modal = document.createElement('div');
@@ -211,8 +211,7 @@
     }
 
     function addSeason() {
-      const pwd = prompt('Mot de passe admin :');
-      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+      if (!checkAdmin()) return;
 
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';

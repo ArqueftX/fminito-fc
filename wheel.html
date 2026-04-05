@@ -140,6 +140,7 @@
   </nav>
   <main id="main"><p style="color:var(--muted);text-align:center;padding:40px">Chargement…</p></main>
 
+  <script src="admin.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
@@ -169,7 +170,6 @@
       'KPOv4VIFREwVLg1NQUtO': '4718', // Mel
       '5wjQuhrj3rQXwIsPYHxu': '6382', // LastCat
     };
-    const ADMIN_CODE = '0550';
 
     function checkAccess() {
       return new Promise(resolve => {
@@ -316,15 +316,13 @@
     }
 
     async function adminUnlock() {
-      const pwd = prompt('Mot de passe admin :');
-      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+      if (!checkAdmin()) return;
       await db.collection('players').doc(playerId).update({ wheelLocked: false, wheelResults: [], wheelSession: null });
       location.reload();
     }
 
     async function changeUnlockDate() {
-      const pwd = prompt('Mot de passe admin :');
-      if (pwd !== '0550') { alert('Mot de passe incorrect.'); return; }
+      if (!checkAdmin()) return;
       const newDate = prompt('Nouvelle date (ex: 5 avril) :', document.getElementById('unlock-date-txt')?.textContent || '3 avril');
       if (!newDate) return;
       await db.collection('config').doc('wheel').set({ unlockDate: newDate });
