@@ -120,29 +120,30 @@
 
     function seasonCard(s, isTotal) {
       const stats = isTotal ? computeTotal() : s;
+      const editBtn = !isTotal ? '<button class="btn-edit-season" onclick="editSeason(\'' + s.id + '\')">✏ Modifier</button>' : '';
+      const noteCell = !isTotal ? '<div class="stat-cell"><div class="stat-label">Note moy.</div><div class="stat-val">' + (s.avgRating ?? '—') + '</div></div>' : '';
+      const highlight = isTotal ? 'highlight' : '';
+      const title = isTotal ? '🏆 Total Carrière' : '📅 Saison ' + s.name;
       return `
         <div class="season-card">
           <div class="season-header">
-            <span class="season-name ${isTotal?'total'}">${isTotal ? '🏆 Total Carrière' : '📅 Saison ' + s.name}</span>
-            ${!isTotal ? `<button class="btn-edit-season" onclick="editSeason('${s.id}')">✏ Modifier</button>` : ''}
+            <span class="season-name ${isTotal?'total':''}">${title}</span>
+            ${editBtn}
           </div>
           <div class="stats-grid">
             <div class="stat-cell">
               <div class="stat-label">Apparitions</div>
-              <div class="stat-val ${isTotal?'highlight':''}">${stats.apps ?? 0}</div>
+              <div class="stat-val ${highlight}">${stats.apps ?? 0}</div>
             </div>
             <div class="stat-cell">
               <div class="stat-label">Buts</div>
-              <div class="stat-val ${isTotal?'highlight':''}">${stats.goals ?? 0}</div>
+              <div class="stat-val ${highlight}">${stats.goals ?? 0}</div>
             </div>
             <div class="stat-cell">
               <div class="stat-label">Passes déc.</div>
-              <div class="stat-val ${isTotal?'highlight':''}">${stats.assists ?? 0}</div>
+              <div class="stat-val ${highlight}">${stats.assists ?? 0}</div>
             </div>
-            ${!isTotal ? `<div class="stat-cell">
-              <div class="stat-label">Note moy.</div>
-              <div class="stat-val">${s.avgRating ?? '—'}</div>
-            </div>` : ''}
+            ${noteCell}
           </div>
         </div>`;
     }
