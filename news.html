@@ -43,9 +43,17 @@
     @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
     .news-imgs-grid { display:grid; gap:2px; background:#0d1208; }
-    .news-img-wrap { position:relative; }
+    .news-img-wrap { position:relative; cursor:zoom-in; }
     .news-img-label { position:absolute; top:8px; left:8px; background:rgba(0,0,0,.65); color:var(--green2); font-family:'Barlow Condensed',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:3px; z-index:1; }
-    .news-img { width:100%; max-height:320px; object-fit:contain; background:#0d1208; display:block; }
+    .news-img { width:100%; max-height:320px; object-fit:contain; background:#0d1208; display:block; transition:opacity .15s; }
+    .news-img-wrap:hover .news-img { opacity:.85; }
+
+    /* LIGHTBOX */
+    .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:2000; display:flex; align-items:center; justify-content:center; cursor:zoom-out; animation:fadeIn .2s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .lightbox img { max-width:95vw; max-height:95vh; object-fit:contain; border-radius:4px; box-shadow:0 0 60px rgba(0,0,0,.8); }
+    .lightbox-close { position:absolute; top:20px; right:24px; color:#fff; font-size:2rem; cursor:pointer; opacity:.7; transition:opacity .2s; font-family:'Bebas Neue',sans-serif; }
+    .lightbox-close:hover { opacity:1; }
     .news-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;}
     .news-date{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
     .news-del{background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:4px 10px;font-size:.75rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;transition:all .2s;}
@@ -105,6 +113,14 @@
       render();
     }
 
+    function openLightbox(url) {
+      const lb = document.createElement('div');
+      lb.className = 'lightbox';
+      lb.innerHTML = '<span class="lightbox-close" onclick="this.parentNode.remove()">✕</span><img src="' + url + '"/>';
+      lb.addEventListener('click', e => { if (e.target === lb) lb.remove(); });
+      document.body.appendChild(lb);
+    }
+
     async function render() {
       const snap = await db.collection('players').doc(playerId).collection('news').orderBy('date','desc').get();
       const articles = snap.docs.map(d => ({id:d.id,...d.data()}));
@@ -140,7 +156,7 @@
               <div class="news-card">
                 <div class="news-imgs-grid" style="grid-template-columns:repeat(${Math.min(imgs.length,2)},1fr)">
                   ${imgs.map(img => `
-                    <div class="news-img-wrap">
+                    <div class="news-img-wrap" onclick="openLightbox('${img.url}')">
                       <div class="news-img-label">${img.label}</div>
                       <img class="news-img" src="${img.url}" alt="${img.label}"/>
                     </div>`).join('')}
