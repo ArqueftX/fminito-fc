@@ -173,6 +173,9 @@
 
     function checkAccess() {
       return new Promise(resolve => {
+        // Si mode admin déjà actif, accès direct
+        if (isAdmin()) { resolve('admin'); return; }
+
         const playerCode = PLAYER_CODES[playerId];
         document.getElementById('main').innerHTML = `
           <div class="auth-box">
@@ -197,7 +200,7 @@
           const pc = document.getElementById('player-code').value.trim();
           const ac = document.getElementById('admin-code').value.trim();
           const err = document.getElementById('auth-error');
-          if (ac === ADMIN_CODE) { resolve('admin'); return; }
+          if (ac === '0550') { resolve('admin'); return; }
           if (playerCode && pc === playerCode) { resolve('player'); return; }
           err.textContent = '❌ Code incorrect. Réessaie.';
           err.style.display = 'block';
@@ -205,7 +208,6 @@
           document.getElementById('admin-code').value = '';
         };
 
-        // Entrée clavier
         document.addEventListener('keydown', function handler(e) {
           if (e.key === 'Enter') {
             document.removeEventListener('keydown', handler);
