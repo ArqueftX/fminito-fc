@@ -148,9 +148,9 @@
         ? '<div class="stat-cell"><div class="stat-label">Valeur transfert</div><div class="stat-val" style="font-size:1.2rem;color:#60aaff">' + s.transfer.amount + '</div></div>'
         : '';
 
-      // Cellules total carrière
+      // Cellule coût total carrière — dans la grille à la suite
       const totalCostCell = isTotal
-        ? '<div class="stat-cell" style="grid-column:1/-1"><div class="stat-label">💸 Coût total carrière</div><div class="stat-val" style="font-size:1.1rem;color:#60aaff">' + stats.totalCost + '</div></div>'
+        ? '<div class="stat-cell"><div class="stat-label">💸 Coût total carrière</div><div class="stat-val" style="font-size:1.1rem;color:#60aaff">' + stats.totalCost + '</div></div>'
         : '';
 
       return `
