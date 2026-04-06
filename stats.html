@@ -125,12 +125,17 @@
       const noteCell = !isTotal ? '<div class="stat-cell"><div class="stat-label">Note moy.</div><div class="stat-val">' + (s.avgRating ?? '—') + '</div></div>' : '';
       const highlight = isTotal ? 'highlight' : '';
       const title = isTotal ? '🏆 Total Carrière' : '📅 Saison ' + s.name;
+      const transferBadge = (!isTotal && s.transfer) ? `
+        <div style="padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(96,170,255,.05);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.06em;color:#60aaff;">
+          ✈ ${s.transfer.type} · ${s.transfer.club}${s.transfer.amount ? ' · ' + s.transfer.amount : ''}
+        </div>` : '';
       return `
         <div class="season-card">
           <div class="season-header">
             <span class="season-name ${isTotal?'total':''}">${title}</span>
             ${editBtn}
           </div>
+          ${transferBadge}
           <div class="stats-grid">
             <div class="stat-cell">
               <div class="stat-label">Apparitions</div>
@@ -183,6 +188,10 @@
       modal.innerHTML = `
         <div class="modal-box">
           <div class="modal-title">✏ Saison ${s.name}</div>
+          <div class="modal-field" style="margin-bottom:4px">
+            <label>Nom de la saison</label>
+            <input type="text" id="m-season-name" value="${s.name}"/>
+          </div>
           <div class="modal-grid">
             <div class="modal-field"><label>Apparitions</label><input type="number" id="m-apps" value="${s.apps??0}" min="0"/></div>
             <div class="modal-field"><label>Buts</label><input type="number" id="m-goals" value="${s.goals??0}" min="0"/></div>
@@ -198,14 +207,15 @@
     }
 
     async function saveStats(seasonId) {
-      const apps     = parseInt(document.getElementById('m-apps').value)    || 0;
-      const goals    = parseInt(document.getElementById('m-goals').value)   || 0;
-      const assists  = parseInt(document.getElementById('m-assists').value) || 0;
+      const name      = document.getElementById('m-season-name').value.trim() || seasons.find(x=>x.id===seasonId).name;
+      const apps      = parseInt(document.getElementById('m-apps').value)    || 0;
+      const goals     = parseInt(document.getElementById('m-goals').value)   || 0;
+      const assists   = parseInt(document.getElementById('m-assists').value) || 0;
       const avgRating = document.getElementById('m-rating').value.trim() || '—';
 
-      await db.collection('players').doc(playerId).collection('seasons').doc(seasonId).update({ apps, goals, assists, avgRating });
+      await db.collection('players').doc(playerId).collection('seasons').doc(seasonId).update({ name, apps, goals, assists, avgRating });
       const idx = seasons.findIndex(x => x.id === seasonId);
-      seasons[idx] = { ...seasons[idx], apps, goals, assists, avgRating };
+      seasons[idx] = { ...seasons[idx], name, apps, goals, assists, avgRating };
       closeModal();
       render();
     }
@@ -219,8 +229,44 @@
       modal.innerHTML = `
         <div class="modal-box">
           <div class="modal-title">+ Nouvelle saison</div>
-          <div class="modal-field"><label>Nom de la saison</label><input type="text" id="m-season-name" placeholder="Ex : 2026/2027"/></div>
-          <div class="modal-actions">
+          <div class="modal-field">
+            <label>Nom de la saison</label>
+            <input type="text" id="m-season-name" placeholder="Ex : 2026/2027"/>
+          </div>
+          <div class="modal-field" style="margin-top:8px">
+            <label>Le joueur est-il toujours au même club ?</label>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="btn-same-club" id="btn-yes" onclick="selectSameClub(true)"
+                style="flex:1;padding:10px;border:1px solid var(--border);border-radius:5px;background:rgba(255,255,255,.03);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s">
+                ✔ Même club
+              </button>
+              <button class="btn-same-club" id="btn-no" onclick="selectSameClub(false)"
+                style="flex:1;padding:10px;border:1px solid var(--border);border-radius:5px;background:rgba(255,255,255,.03);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s">
+                ✈ Nouveau club
+              </button>
+            </div>
+          </div>
+          <div id="transfer-fields" style="display:none;flex-direction:column;gap:12px;margin-top:4px">
+            <div class="modal-field">
+              <label>Nom du nouveau club</label>
+              <input type="text" id="m-new-club" placeholder="Ex : AS Monaco"/>
+            </div>
+            <div class="modal-field">
+              <label>Type de transfert</label>
+              <div style="display:flex;gap:8px;margin-top:6px">
+                ${['Transfert','Prêt','Libre'].map(t => `
+                  <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);transition:all .15s" id="tlbl-${t}">
+                    <input type="radio" name="transfer-type" value="${t}" onchange="updateTransferType('${t}')" style="display:none"/>
+                    ${t}
+                  </label>`).join('')}
+              </div>
+            </div>
+            <div class="modal-field" id="amount-field" style="display:none">
+              <label>Montant (optionnel)</label>
+              <input type="text" id="m-amount" placeholder="Ex : 5M€ ou 500k€"/>
+            </div>
+          </div>
+          <div class="modal-actions" style="margin-top:8px">
             <button class="btn-cancel" onclick="closeModal()">Annuler</button>
             <button class="btn-save" onclick="confirmAddSeason()">✔ Créer</button>
           </div>
@@ -228,13 +274,58 @@
       document.body.appendChild(modal);
     }
 
+    let sameClub = true;
+    let selectedTransferType = null;
+
+    function selectSameClub(same) {
+      sameClub = same;
+      const tf = document.getElementById('transfer-fields');
+      tf.style.display = same ? 'none' : 'flex';
+      document.getElementById('btn-yes').style.borderColor = same ? 'var(--green)' : 'var(--border)';
+      document.getElementById('btn-yes').style.color = same ? 'var(--green)' : 'var(--muted)';
+      document.getElementById('btn-no').style.borderColor = !same ? 'var(--green)' : 'var(--border)';
+      document.getElementById('btn-no').style.color = !same ? 'var(--green)' : 'var(--muted)';
+    }
+
+    function updateTransferType(type) {
+      selectedTransferType = type;
+      ['Transfert','Prêt','Libre'].forEach(t => {
+        const lbl = document.getElementById('tlbl-' + t);
+        lbl.style.borderColor = t === type ? 'var(--green)' : 'var(--border)';
+        lbl.style.color = t === type ? 'var(--green)' : 'var(--muted)';
+      });
+      document.getElementById('amount-field').style.display = type === 'Transfert' ? 'block' : 'none';
+    }
+
     async function confirmAddSeason() {
       const name = document.getElementById('m-season-name').value.trim();
       if (!name) { alert('Entre un nom de saison.'); return; }
+
+      let newClub = null;
+      let transfer = null;
+
+      if (!sameClub) {
+        newClub = document.getElementById('m-new-club').value.trim();
+        if (!newClub) { alert('Entre le nom du nouveau club.'); return; }
+        if (!selectedTransferType) { alert('Sélectionne un type de transfert.'); return; }
+        const amount = document.getElementById('m-amount')?.value?.trim() || '';
+        transfer = { type: selectedTransferType, amount, club: newClub };
+      }
+
+      // Si nouveau club → mettre à jour le club du joueur dans Firebase
+      if (newClub) {
+        const clubDisplay = selectedTransferType === 'Prêt'
+          ? newClub + ' (Prêt)'
+          : newClub;
+        await db.collection('players').doc(playerId).update({ club: clubDisplay });
+        playerData.club = clubDisplay;
+      }
+
       const ref = await db.collection('players').doc(playerId).collection('seasons').add({
-        name, ...DEFAULT_STATS, createdAt: new Date().toISOString()
+        name, ...DEFAULT_STATS, transfer: transfer || null, createdAt: new Date().toISOString()
       });
-      seasons.push({ id:ref.id, name, ...DEFAULT_STATS });
+      seasons.push({ id:ref.id, name, ...DEFAULT_STATS, transfer: transfer || null });
+      sameClub = true; selectedTransferType = null;
       closeModal();
       render();
     }
@@ -242,6 +333,7 @@
     function closeModal() {
       const m = document.getElementById('stats-modal');
       if (m) m.remove();
+      sameClub = true; selectedTransferType = null;
     }
 
     init();
