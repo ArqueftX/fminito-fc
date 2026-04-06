@@ -199,6 +199,7 @@
             <div class="modal-field"><label>Note moyenne</label><input type="text" id="m-rating" value="${s.avgRating??''}" placeholder="Ex : 7.2"/></div>
           </div>
           <div class="modal-actions">
+            <button class="btn-cancel" onclick="deleteSeason('${seasonId}')" style="border-color:#c0392b;color:#c0392b;">✕ Supprimer</button>
             <button class="btn-cancel" onclick="closeModal()">Annuler</button>
             <button class="btn-save" onclick="saveStats('${seasonId}')">✔ Enregistrer</button>
           </div>
@@ -326,6 +327,14 @@
       });
       seasons.push({ id:ref.id, name, ...DEFAULT_STATS, transfer: transfer || null });
       sameClub = true; selectedTransferType = null;
+      closeModal();
+      render();
+    }
+
+    async function deleteSeason(seasonId) {
+      if (!confirm('Supprimer cette saison ? Cette action est irréversible.')) return;
+      await db.collection('players').doc(playerId).collection('seasons').doc(seasonId).delete();
+      seasons = seasons.filter(x => x.id !== seasonId);
       closeModal();
       render();
     }
