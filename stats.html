@@ -255,7 +255,7 @@
             <div class="modal-field">
               <label>Type de transfert</label>
               <div style="display:flex;gap:8px;margin-top:6px">
-                ${['Transfert','Prêt','Libre'].map(t => `
+                ${['Transfert','Prêt','Libre','Promotion'].map(t => `
                   <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);transition:all .15s" id="tlbl-${t}">
                     <input type="radio" name="transfer-type" value="${t}" onchange="updateTransferType('${t}')" style="display:none"/>
                     ${t}
@@ -295,8 +295,7 @@
         lbl.style.borderColor = t === type ? 'var(--green)' : 'var(--border)';
         lbl.style.color = t === type ? 'var(--green)' : 'var(--muted)';
       });
-      document.getElementById('amount-field').style.display = type === 'Transfert' ? 'block' : 'none';
-    }
+      document.getElementById('amount-field').style.display = type === 'Transfert' ? 'block' : 'none';    }
 
     async function confirmAddSeason() {
       const name = document.getElementById('m-season-name').value.trim();
