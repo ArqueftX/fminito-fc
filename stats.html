@@ -115,15 +115,14 @@
         apps:    (acc.apps    || 0) + (parseInt(s.apps)    || 0),
         goals:   (acc.goals   || 0) + (parseInt(s.goals)   || 0),
         assists: (acc.assists || 0) + (parseInt(s.assists)  || 0),
+        motm:    (acc.motm    || 0) + (parseInt(s.motm)     || 0),
       }), {});
 
-      // Moyenne des notes (on ignore les '—')
       const ratedSeasons = seasons.filter(s => s.avgRating && s.avgRating !== '—' && !isNaN(parseFloat(s.avgRating)));
       total.avgRating = ratedSeasons.length > 0
         ? (ratedSeasons.reduce((sum, s) => sum + parseFloat(s.avgRating), 0) / ratedSeasons.length).toFixed(2)
         : '—';
 
-      // Coût total carrière (uniquement les transferts avec montant)
       const amounts = seasons
         .filter(s => s.transfer && s.transfer.amount && s.transfer.amount.trim() !== '')
         .map(s => s.transfer.amount);
@@ -172,6 +171,10 @@
             <div class="stat-cell">
               <div class="stat-label">Passes déc.</div>
               <div class="stat-val ${highlight}">${stats.assists ?? 0}</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-label">🏅 Homme du match</div>
+              <div class="stat-val ${highlight}">${stats.motm ?? 0}</div>
             </div>
             <div class="stat-cell">
               <div class="stat-label">Note moy.</div>
@@ -225,6 +228,7 @@
             <div class="modal-field"><label>Apparitions</label><input type="number" id="m-apps" value="${s.apps??0}" min="0"/></div>
             <div class="modal-field"><label>Buts</label><input type="number" id="m-goals" value="${s.goals??0}" min="0"/></div>
             <div class="modal-field"><label>Passes déc.</label><input type="number" id="m-assists" value="${s.assists??0}" min="0"/></div>
+            <div class="modal-field"><label>🏅 Homme du match</label><input type="number" id="m-motm" value="${s.motm??0}" min="0"/></div>
             <div class="modal-field"><label>Note moyenne</label><input type="text" id="m-rating" value="${s.avgRating??''}" placeholder="Ex : 7.2"/></div>
           </div>
           <div class="modal-actions">
@@ -241,11 +245,12 @@
       const apps      = parseInt(document.getElementById('m-apps').value)    || 0;
       const goals     = parseInt(document.getElementById('m-goals').value)   || 0;
       const assists   = parseInt(document.getElementById('m-assists').value) || 0;
+      const motm      = parseInt(document.getElementById('m-motm').value)    || 0;
       const avgRating = document.getElementById('m-rating').value.trim() || '—';
 
-      await db.collection('players').doc(playerId).collection('seasons').doc(seasonId).update({ name, apps, goals, assists, avgRating });
+      await db.collection('players').doc(playerId).collection('seasons').doc(seasonId).update({ name, apps, goals, assists, motm, avgRating });
       const idx = seasons.findIndex(x => x.id === seasonId);
-      seasons[idx] = { ...seasons[idx], name, apps, goals, assists, avgRating };
+      seasons[idx] = { ...seasons[idx], name, apps, goals, assists, motm, avgRating };
       closeModal();
       render();
     }
