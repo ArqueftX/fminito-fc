@@ -288,7 +288,7 @@
             </div>
             <div class="modal-field">
               <label>Type de transfert</label>
-              <div style="display:flex;gap:8px;margin-top:6px">
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
                 ${['Transfert','Prêt','Libre','Promotion','Retour de prêt'].map(t => `
                   <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);transition:all .15s" id="tlbl-${t}">
                     <input type="radio" name="transfer-type" value="${t}" onchange="updateTransferType('${t}')" style="display:none"/>
@@ -324,12 +324,15 @@
 
     function updateTransferType(type) {
       selectedTransferType = type;
-      ['Transfert','Prêt','Libre'].forEach(t => {
+      ['Transfert','Prêt','Libre','Promotion','Retour de prêt'].forEach(t => {
         const lbl = document.getElementById('tlbl-' + t);
+        if (!lbl) return;
         lbl.style.borderColor = t === type ? 'var(--green)' : 'var(--border)';
         lbl.style.color = t === type ? 'var(--green)' : 'var(--muted)';
+        lbl.style.background = t === type ? 'rgba(168,192,0,.08)' : 'rgba(255,255,255,.02)';
       });
-      document.getElementById('amount-field').style.display = (type === 'Transfert' || type === 'Prêt') ? 'block' : 'none';    }
+      document.getElementById('amount-field').style.display = (type === 'Transfert' || type === 'Prêt') ? 'block' : 'none';
+    }
 
     async function confirmAddSeason() {
       const name = document.getElementById('m-season-name').value.trim();
