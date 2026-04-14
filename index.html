@@ -451,11 +451,29 @@
 </head>
 <body>
 
-  <header>
+  <header style="position:relative;">
     <img src="logo.png" alt="FMinito FC Logo" class="logo-img" />
     <h1 class="club-title">FMinito FC</h1>
     <p class="subtitle">Football Manager 26 · Saison en cours</p>
+    <div id="notif-bell" style="display:none;position:absolute;top:16px;right:20px;cursor:pointer;" onclick="toggleInbox()">
+      <div style="position:relative;display:inline-block;">
+        <span style="font-size:1.6rem;">🔔</span>
+        <span id="notif-count" style="display:none;position:absolute;top:-4px;right:-6px;background:#e74c3c;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.75rem;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;"></span>
+      </div>
+    </div>
   </header>
+
+  <!-- INBOX -->
+  <div id="notif-inbox" style="display:none;position:fixed;top:60px;right:16px;width:340px;max-height:480px;overflow-y:auto;background:#1a2008;border:1px solid var(--border);border-radius:10px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:var(--green);">🔔 Notifications</span>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button onclick="markAllRead()" style="background:none;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Tout lire</button>
+        <button onclick="toggleInbox()" style="background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <div id="notif-list" style="padding:8px 0;"></div>
+  </div>
 
   <div class="divider"><span>⬦ Effectif ⬦</span></div>
 
@@ -602,7 +620,113 @@
         </div>`).join('');
     }
 
-    // Écoute en temps réel — se met à jour automatiquement pour tout le monde
+    // ── SYSTÈME DE NOTIFICATIONS ADMIN ──
+    let notifUnsubscribe = null;
+    let inboxOpen = false;
+    let knownNotifIds = new Set();
+
+    function initNotifications() {
+      if (!isAdmin()) return;
+      document.getElementById('notif-bell').style.display = 'block';
+
+      notifUnsubscribe = db.collection('notifications')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(snapshot => {
+          const notifs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          const unread = notifs.filter(n => !n.read);
+
+          // Badge
+          const countEl = document.getElementById('notif-count');
+          if (unread.length > 0) {
+            countEl.style.display = 'flex';
+            countEl.textContent = unread.length;
+          } else {
+            countEl.style.display = 'none';
+          }
+
+          // Son + notif navigateur pour les nouvelles
+          notifs.forEach(n => {
+            if (!n.read && !knownNotifIds.has(n.id)) {
+              knownNotifIds.add(n.id);
+              if (knownNotifIds.size > 1) playNotifSound(); // pas au premier chargement
+              if (Notification.permission === 'granted') {
+                new Notification('🎰 Roue terminée !', {
+                  body: n.playerName + ' a terminé sa roue du destin.',
+                  icon: 'logo.png'
+                });
+              }
+            }
+          });
+
+          renderInbox(notifs);
+        });
+
+      // Demande permission notifs navigateur
+      if (Notification.permission === 'default') Notification.requestPermission();
+    }
+
+    function renderInbox(notifs) {
+      const list = document.getElementById('notif-list');
+      if (!notifs.length) {
+        list.innerHTML = '<p style="padding:20px;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:.9rem;letter-spacing:.06em;color:var(--muted);">Aucune notification</p>';
+        return;
+      }
+      list.innerHTML = notifs.map(n => `
+        <div onclick="markRead('${n.id}')" style="padding:12px 18px;border-bottom:1px solid var(--border);cursor:pointer;background:${n.read ? 'transparent' : 'rgba(168,192,0,.04)'};transition:background .2s;" onmouseover="this.style.background='rgba(168,192,0,.06)'" onmouseout="this.style.background='${n.read ? 'transparent' : 'rgba(168,192,0,.04)'}'">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            ${!n.read ? '<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;"></span>' : '<span style="width:7px;height:7px;display:inline-block;flex-shrink:0;"></span>'}
+            <span style="font-family:\'Bebas Neue\',sans-serif;font-size:1rem;letter-spacing:.06em;color:var(--text);">🎰 ${n.playerName}</span>
+          </div>
+          <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:.82rem;letter-spacing:.05em;color:var(--muted);margin-left:15px;">${n.summary}</div>
+          ${n.potGain > 0 ? '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:.78rem;color:#60aaff;margin-left:15px;margin-top:2px;">📈 +' + n.potGain + ' potentiel</div>' : ''}
+          <div style="font-family:\'Barlow Condensed\',sans-serif;font-size:.72rem;color:var(--muted);opacity:.5;margin-left:15px;margin-top:4px;">${new Date(n.createdAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>`).join('');
+    }
+
+    function toggleInbox() {
+      inboxOpen = !inboxOpen;
+      document.getElementById('notif-inbox').style.display = inboxOpen ? 'block' : 'none';
+    }
+
+    async function markRead(id) {
+      await db.collection('notifications').doc(id).update({ read: true });
+    }
+
+    async function markAllRead() {
+      const snap = await db.collection('notifications').where('read','==',false).get();
+      const batch = db.batch();
+      snap.docs.forEach(d => batch.update(d.ref, { read: true }));
+      await batch.commit();
+    }
+
+    function playNotifSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      } catch(e) {}
+    }
+
+    // Lance les notifs si admin au chargement
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => { if (isAdmin()) initNotifications(); }, 500);
+    });
+
+    // Réactive si admin mode activé via CTRL+M
+    const _origShowBadge = window.showAdminBadge;
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'm' && !isAdmin()) {
+        setTimeout(() => { if (isAdmin()) initNotifications(); }, 100);
+      }
+    });
     document.getElementById('roster').innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px">Chargement…</p>`;
     db.collection('players').orderBy('createdAt').onSnapshot(snapshot => {
       const players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

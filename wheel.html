@@ -508,14 +508,26 @@
         // Calcule le gain de potentiel total
         const potGain = results.filter(r=>r.type==='p').reduce((sum,r)=>sum+r.val, 0);
 
-        // Récupère le potentiel actuel et met à jour
         const playerDoc = await db.collection('players').doc(playerId).get();
-        const currentPotential = playerDoc.data().potential ?? 110;
+        const pData = playerDoc.data();
+        const currentPotential = pData.potential ?? 110;
         await db.collection('players').doc(playerId).update({
           wheelLocked: true,
           wheelResults: results,
           wheelSession: null,
           potential: currentPotential + potGain
+        });
+
+        // Notification pour l'admin
+        const summary = results.map(r => (r.type==='a'?'Attr':'Pot') + ' ' + r.label).join(' · ');
+        await db.collection('notifications').add({
+          type: 'wheel_done',
+          playerId,
+          playerName: (pData.firstName || '') + ' ' + (pData.lastName || ''),
+          summary,
+          potGain,
+          read: false,
+          createdAt: new Date().toISOString()
         });
 
         const btn=document.getElementById('btn-spin');
