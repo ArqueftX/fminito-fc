@@ -137,10 +137,17 @@
       const highlight = isTotal ? 'highlight' : '';
       const title = isTotal ? '🏆 Total Carrière' : '📅 Saison ' + s.name;
 
-      const transferBadge = (!isTotal && s.transfer) ? `
-        <div style="padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(96,170,255,.05);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.06em;color:#60aaff;">
-          ✈ ${s.transfer.type} · ${s.transfer.club}${s.transfer.amount ? ' · ' + s.transfer.amount : ''}
-        </div>` : '';
+      const transferBadge = !isTotal ? (() => {
+        if (s.transfer) {
+          return `<div style="padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(96,170,255,.05);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.06em;color:#60aaff;">
+            ✈ ${s.transfer.type} · ${s.transfer.club}${s.transfer.amount ? ' · ' + s.transfer.amount : ''}
+          </div>`;
+        } else {
+          return `<div style="padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(168,192,0,.03);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.06em;color:var(--muted);">
+            ⚽ ${playerData.club || '—'}
+          </div>`;
+        }
+      })() : '';
 
       // Cellule valeur transfert par saison
       const transferCell = (!isTotal && s.transfer && s.transfer.amount)
