@@ -102,9 +102,9 @@
       // Crée la saison 2025/2026 si elle n'existe pas
       if (seasons.length === 0) {
         const ref = await db.collection('players').doc(playerId).collection('seasons').add({
-          name:'2025/2026', ...DEFAULT_STATS, createdAt: new Date().toISOString()
+          name:'2025/2026', club: playerData.club || '', ...DEFAULT_STATS, createdAt: new Date().toISOString()
         });
-        seasons = [{id:ref.id, name:'2025/2026', ...DEFAULT_STATS, createdAt: new Date().toISOString()}];
+        seasons = [{id:ref.id, name:'2025/2026', club: playerData.club || '', ...DEFAULT_STATS, createdAt: new Date().toISOString()}];
       }
 
       render();
@@ -137,10 +137,18 @@
       const highlight = isTotal ? 'highlight' : '';
       const title = isTotal ? '🏆 Total Carrière' : '📅 Saison ' + s.name;
 
-      const transferBadge = (!isTotal && s.transfer) ? `
-        <div style="padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(96,170,255,.05);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.06em;color:#60aaff;">
-          ✈ ${s.transfer.type} · ${s.transfer.club}${s.transfer.amount ? ' · ' + s.transfer.amount : ''}
-        </div>` : '';
+      const transferBadge = !isTotal ? (() => {
+        const clubName = s.club || playerData.club || '—';
+        if (s.transfer) {
+          return `<div style="padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(96,170,255,.05);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.06em;color:#60aaff;">
+            ✈ ${s.transfer.type} · ${clubName}${s.transfer.amount ? ' · ' + s.transfer.amount : ''}
+          </div>`;
+        } else {
+          return `<div style="padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(168,192,0,.03);font-family:'Barlow Condensed',sans-serif;font-size:.82rem;letter-spacing:.06em;color:var(--muted);">
+            ⚽ ${clubName}
+          </div>`;
+        }
+      })() : '';
 
       // Cellule valeur transfert par saison
       const transferCell = (!isTotal && s.transfer && s.transfer.amount)
@@ -224,6 +232,10 @@
             <label>Nom de la saison</label>
             <input type="text" id="m-season-name" value="${s.name}"/>
           </div>
+          <div class="modal-field" style="margin-bottom:4px">
+            <label>Club de la saison</label>
+            <input type="text" id="m-season-club" value="${s.club || playerData.club || ''}" placeholder="Ex : AS Monaco"/>
+          </div>
           <div class="modal-grid">
             <div class="modal-field"><label>Apparitions</label><input type="number" id="m-apps" value="${s.apps??0}" min="0"/></div>
             <div class="modal-field"><label>Buts</label><input type="number" id="m-goals" value="${s.goals??0}" min="0"/></div>
@@ -242,15 +254,24 @@
 
     async function saveStats(seasonId) {
       const name      = document.getElementById('m-season-name').value.trim() || seasons.find(x=>x.id===seasonId).name;
+      const club      = document.getElementById('m-season-club').value.trim() || playerData.club || '';
       const apps      = parseInt(document.getElementById('m-apps').value)    || 0;
       const goals     = parseInt(document.getElementById('m-goals').value)   || 0;
       const assists   = parseInt(document.getElementById('m-assists').value) || 0;
       const motm      = parseInt(document.getElementById('m-motm').value)    || 0;
       const avgRating = document.getElementById('m-rating').value.trim() || '—';
 
-      await db.collection('players').doc(playerId).collection('seasons').doc(seasonId).update({ name, apps, goals, assists, motm, avgRating });
+      await db.collection('players').doc(playerId).collection('seasons').doc(seasonId).update({ name, club, apps, goals, assists, motm, avgRating });
+
+      // Met à jour le club actuel du joueur si la saison modifiée est la dernière
+      const lastSeason = seasons[seasons.length - 1];
+      if (lastSeason && lastSeason.id === seasonId && club !== playerData.club) {
+        await db.collection('players').doc(playerId).update({ club });
+        playerData.club = club;
+      }
+
       const idx = seasons.findIndex(x => x.id === seasonId);
-      seasons[idx] = { ...seasons[idx], name, apps, goals, assists, motm, avgRating };
+      seasons[idx] = { ...seasons[idx], name, club, apps, goals, assists, motm, avgRating };
       closeModal();
       render();
     }
@@ -359,9 +380,9 @@
       }
 
       const ref = await db.collection('players').doc(playerId).collection('seasons').add({
-        name, ...DEFAULT_STATS, transfer: transfer || null, createdAt: new Date().toISOString()
+        name, club: newClub || playerData.club || '', ...DEFAULT_STATS, transfer: transfer || null, createdAt: new Date().toISOString()
       });
-      seasons.push({ id:ref.id, name, ...DEFAULT_STATS, transfer: transfer || null });
+      seasons.push({ id:ref.id, name, club: newClub || playerData.club || '', ...DEFAULT_STATS, transfer: transfer || null });
       sameClub = true; selectedTransferType = null;
       closeModal();
       render();
