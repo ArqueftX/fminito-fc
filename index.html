@@ -632,8 +632,8 @@
 
       // Valeur — on affiche même sans valeur (—)
       const byValue = [...players].sort((a,b) => {
-        const va = parseFloat((a.value||'0').replace(/[^0-9.]/g,'')) || 0;
-        const vb = parseFloat((b.value||'0').replace(/[^0-9.]/g,'')) || 0;
+        const va = parseFloat((a.value||'').match(/[\d.]+/)?.[0] || '0') || 0;
+        const vb = parseFloat((b.value||'').match(/[\d.]+/)?.[0] || '0') || 0;
         return vb - va;
       });
       document.getElementById('rank-value').innerHTML = byValue.map((p, i) => `
