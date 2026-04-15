@@ -383,7 +383,8 @@
       document.getElementById('content').innerHTML = `
         <div class="edit-bar">
           <a href="edit.html?id=${p.id}" class="btn-edit">✏ Modifier la fiche</a>
-          <button class="btn-edit" onclick="adminEditRatings()" style="cursor:pointer;border:none">⚙ Niveaux (admin)</button>
+          <button class="btn-edit" onclick="adminEditRatings()" style="cursor:pointer;border:none">⚙ Niveau (admin)</button>
+          <button class="btn-edit" onclick="adminEditValue()" style="cursor:pointer;border:none">💰 Valeur & Salaire (admin)</button>
           <label class="btn-edit color-pick-wrap" title="Couleur de ta fiche" style="cursor:pointer;gap:8px">
             🎨 Couleur
             <input type="color" id="profile-color" value="${p.profileColor || '#a8c000'}"
@@ -487,19 +488,30 @@
 
       const doc = await db.collection('players').doc(id).get();
       const cur = doc.data();
-      const newOverall   = prompt('Nouveau niveau général (actuel : ' + (cur.overall ?? 100) + ') :', cur.overall ?? 100);
+      const newOverall = prompt('Nouveau niveau général (actuel : ' + (cur.overall ?? 100) + ') :', cur.overall ?? 100);
       if (newOverall === null) return;
-      const newPotential = prompt('Nouveau potentiel (actuel : ' + (cur.potential ?? 110) + ') :', cur.potential ?? 110);
-      if (newPotential === null) return;
 
       const ov = parseInt(newOverall);
-      const po = parseInt(newPotential);
-      if (isNaN(ov) || isNaN(po)) { alert('Valeurs invalides.'); return; }
+      if (isNaN(ov)) { alert('Valeur invalide.'); return; }
 
-      await db.collection('players').doc(id).update({ overall: ov, potential: po });
-      document.getElementById('display-overall').textContent   = ov;
-      document.getElementById('display-potential').textContent = po;
-      alert('✔ Mis à jour !');
+      await db.collection('players').doc(id).update({ overall: ov });
+      document.getElementById('display-overall').textContent = ov;
+      alert('✔ Niveau mis à jour !');
+    }
+
+    async function adminEditValue() {
+      if (!checkAdmin()) return;
+
+      const doc = await db.collection('players').doc(id).get();
+      const cur = doc.data();
+
+      const newValue  = prompt('Valeur du joueur (actuelle : ' + (cur.value  || '—') + ') :', cur.value  || '');
+      if (newValue  === null) return;
+      const newSalary = prompt('Salaire du joueur (actuel : '  + (cur.salary || '—') + ') :', cur.salary || '');
+      if (newSalary === null) return;
+
+      await db.collection('players').doc(id).update({ value: newValue.trim(), salary: newSalary.trim() });
+      alert('✔ Valeur & salaire mis à jour !');
     }
 
     function hexToRgb(hex) {

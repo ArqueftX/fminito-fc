@@ -393,11 +393,11 @@
     /* ── PAGE LAYOUT ── */
     .page-layout {
       display: grid;
-      grid-template-columns: 220px 1fr;
+      grid-template-columns: 200px 1fr 200px;
       gap: 28px;
       align-items: start;
     }
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
       .page-layout { grid-template-columns: 1fr; }
     }
 
@@ -479,15 +479,13 @@
 
   <main>
     <div class="page-layout">
-      <!-- CLASSEMENT -->
+      <!-- CLASSEMENT GAUCHE -->
       <aside class="ranking-panel">
         <div class="ranking-title">🏆 Classement</div>
-
         <div class="ranking-section">
           <div class="ranking-label">Niveau général</div>
           <div id="rank-overall"></div>
         </div>
-
         <div class="ranking-section">
           <div class="ranking-label">Potentiel</div>
           <div id="rank-potential"></div>
@@ -510,6 +508,19 @@
         </div>
         <div id="roster"></div>
       </div>
+
+      <!-- CLASSEMENT DROITE -->
+      <aside class="ranking-panel">
+        <div class="ranking-title">💰 Mercato</div>
+        <div class="ranking-section">
+          <div class="ranking-label">Valeur</div>
+          <div id="rank-value"></div>
+        </div>
+        <div class="ranking-section">
+          <div class="ranking-label">Salaire</div>
+          <div id="rank-salary"></div>
+        </div>
+      </aside>
     </div>
   </main>
 
@@ -617,6 +628,32 @@
           <span class="rank-pos ${medal(i)}">${i+1}</span>
           <span class="rank-name">${p.firstName} ${p.lastName}</span>
           <span class="rank-val pot">${p.potential ?? 110}</span>
+        </div>`).join('');
+
+      // Valeur — on affiche même sans valeur (—)
+      const byValue = [...players].sort((a,b) => {
+        const va = parseFloat((a.value||'0').replace(/[^0-9.]/g,'')) || 0;
+        const vb = parseFloat((b.value||'0').replace(/[^0-9.]/g,'')) || 0;
+        return vb - va;
+      });
+      document.getElementById('rank-value').innerHTML = byValue.map((p, i) => `
+        <div class="rank-row" onclick="window.location.href='player.html?id=${p.id}'">
+          <span class="rank-pos ${medal(i)}">${i+1}</span>
+          <span class="rank-name">${p.firstName} ${p.lastName}</span>
+          <span class="rank-val" style="color:#e8a000;font-size:.85rem">${p.value || '—'}</span>
+        </div>`).join('');
+
+      // Salaire
+      const bySalary = [...players].sort((a,b) => {
+        const sa = parseFloat((a.salary||'0').replace(/[^0-9.]/g,'')) || 0;
+        const sb = parseFloat((b.salary||'0').replace(/[^0-9.]/g,'')) || 0;
+        return sb - sa;
+      });
+      document.getElementById('rank-salary').innerHTML = bySalary.map((p, i) => `
+        <div class="rank-row" onclick="window.location.href='player.html?id=${p.id}'">
+          <span class="rank-pos ${medal(i)}">${i+1}</span>
+          <span class="rank-name">${p.firstName} ${p.lastName}</span>
+          <span class="rank-val" style="color:#e8a000;font-size:.85rem">${p.salary || '—'}</span>
         </div>`).join('');
     }
 
