@@ -631,11 +631,16 @@
         </div>`).join('');
 
       // Valeur — on affiche même sans valeur (—)
-      const byValue = [...players].sort((a,b) => {
-        const va = parseFloat((a.value||'').match(/[\d.]+/)?.[0] || '0') || 0;
-        const vb = parseFloat((b.value||'').match(/[\d.]+/)?.[0] || '0') || 0;
-        return vb - va;
-      });
+      function parseVal(str) {
+        if (!str) return 0;
+        const s = str.toLowerCase().replace(/\s/g,'');
+        const num = parseFloat(s.match(/[\d.]+/)?.[0] || '0') || 0;
+        if (s.includes('m')) return num * 1000000;
+        if (s.includes('k')) return num * 1000;
+        return num;
+      }
+
+      const byValue = [...players].sort((a,b) => parseVal(b.value) - parseVal(a.value));
       document.getElementById('rank-value').innerHTML = byValue.map((p, i) => `
         <div class="rank-row" onclick="window.location.href='player.html?id=${p.id}'">
           <span class="rank-pos ${medal(i)}">${i+1}</span>
@@ -644,11 +649,7 @@
         </div>`).join('');
 
       // Salaire
-      const bySalary = [...players].sort((a,b) => {
-        const sa = parseFloat((a.salary||'0').replace(/[^0-9.]/g,'')) || 0;
-        const sb = parseFloat((b.salary||'0').replace(/[^0-9.]/g,'')) || 0;
-        return sb - sa;
-      });
+      const bySalary = [...players].sort((a,b) => parseVal(b.salary) - parseVal(a.salary));
       document.getElementById('rank-salary').innerHTML = bySalary.map((p, i) => `
         <div class="rank-row" onclick="window.location.href='player.html?id=${p.id}'">
           <span class="rank-pos ${medal(i)}">${i+1}</span>
