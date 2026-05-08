@@ -451,6 +451,28 @@
             <div class="stat-row"><span class="stat-key">Ajouté le</span><span class="stat-val">${new Date(p.createdAt).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}</span></div>
           </div>
 
+          <!-- SÉLECTIONS -->
+          <div class="profile-block full">
+            <div class="block-title" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>🌍 Sélections</span>
+              <button onclick="adminEditSelections()" class="btn-edit" style="cursor:pointer;border:none;font-size:.75rem;padding:4px 12px;">⚙ Modifier (admin)</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+              <div style="padding:14px 20px;border-right:1px solid var(--border);">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:10px;">Équipe A</div>
+                <div class="stat-row" style="border:none;padding:0;margin-bottom:8px;"><span class="stat-key">Sélections</span><span class="stat-val">${p.caps ?? 0}</span></div>
+                <div class="stat-row" style="border:none;padding:0;"><span class="stat-key">Buts</span><span class="stat-val">${p.capsGoals ?? 0}</span></div>
+              </div>
+              <div style="padding:14px 20px;">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+                  Jeunes ${p.youthCategory ? '<span style="background:rgba(168,192,0,.1);color:var(--green);border:1px solid rgba(168,192,0,.2);border-radius:3px;padding:1px 7px;font-size:.65rem;margin-left:4px;">' + p.youthCategory + '</span>' : ''}
+                </div>
+                <div class="stat-row" style="border:none;padding:0;margin-bottom:8px;"><span class="stat-key">Sélections</span><span class="stat-val">${p.youthCaps ?? 0}</span></div>
+                <div class="stat-row" style="border:none;padding:0;"><span class="stat-key">Buts</span><span class="stat-val">${p.youthGoals ?? 0}</span></div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- ROUE DU DESTIN -->
@@ -540,6 +562,67 @@
 
     async function saveColor(playerId, hex) {
       await db.collection('players').doc(playerId).update({ profileColor: hex });
+    }
+
+    async function adminEditSelections() {
+      if (!checkAdmin()) return;
+
+      const doc = await db.collection('players').doc(id).get();
+      const cur = doc.data();
+
+      const modal = document.createElement('div');
+      modal.id = 'sel-modal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div style="background:#1a2008;border:1px solid var(--border);border-radius:12px;width:min(460px,95vw);padding:28px;display:flex;flex-direction:column;gap:16px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.08em;color:var(--green);">🌍 Modifier les Sélections</div>
+
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);padding-bottom:4px;border-bottom:1px solid var(--border);">Équipe A</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Sélections</label>
+              <input type="number" id="sel-caps" value="${cur.caps??0}" min="0" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.95rem;padding:10px 12px;outline:none;width:100%;"/>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Buts</label>
+              <input type="number" id="sel-capsGoals" value="${cur.capsGoals??0}" min="0" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.95rem;padding:10px 12px;outline:none;width:100%;"/>
+            </div>
+          </div>
+
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding-bottom:4px;border-bottom:1px solid var(--border);">Équipe Jeunes</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Catégorie (ex : U18, U21…)</label>
+            <input type="text" id="sel-youthCat" value="${cur.youthCategory||''}" placeholder="Ex : U21" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.95rem;padding:10px 12px;outline:none;width:100%;"/>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Sélections</label>
+              <input type="number" id="sel-youthCaps" value="${cur.youthCaps??0}" min="0" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.95rem;padding:10px 12px;outline:none;width:100%;"/>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Buts</label>
+              <input type="number" id="sel-youthGoals" value="${cur.youthGoals??0}" min="0" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.95rem;padding:10px 12px;outline:none;width:100%;"/>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;">
+            <button onclick="document.getElementById('sel-modal').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Annuler</button>
+            <button onclick="saveSelections()" style="background:var(--green);color:var(--dark);border:none;border-radius:5px;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">✔ Enregistrer</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+
+    async function saveSelections() {
+      const caps         = parseInt(document.getElementById('sel-caps').value)       || 0;
+      const capsGoals    = parseInt(document.getElementById('sel-capsGoals').value)  || 0;
+      const youthCategory = document.getElementById('sel-youthCat').value.trim();
+      const youthCaps    = parseInt(document.getElementById('sel-youthCaps').value)  || 0;
+      const youthGoals   = parseInt(document.getElementById('sel-youthGoals').value) || 0;
+
+      await db.collection('players').doc(id).update({ caps, capsGoals, youthCategory, youthCaps, youthGoals });
+      document.getElementById('sel-modal').remove();
+      loadPlayer();
     }
 
     loadPlayer();
